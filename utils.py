@@ -1,0 +1,115 @@
+import bpy
+from . import merge_collection
+from . import make_list
+
+
+class Utils(bpy.types.Operator):
+    bl_label = "Create"
+    bl_idname = "gameexport.utils"
+    bl_description = "A demo operator"
+
+    def get_all_children_collections(self, col, col_children):
+        if col.children:
+            for child in col.children:
+                col_children.append(child)
+                if child.children:
+                    Utils.get_all_children_collections(self, child, col_children)
+        return col_children
+
+    def cleanup_after_export(self):
+        for col in bpy.data.collections:
+            if "EXPORT" in col.name:
+                bpy.data.collections.remove(col)
+
+    def find_parent(self, col):
+        for c in bpy.data.collections:
+            if c.children:
+                for child in c.children:
+                    if child == col:
+                        return c
+        return bpy.context.scene.collection
+
+    def find_view_layer_collection(self, col, col_layer, col_list):
+        if col_layer.collection == col:
+            col_list.append(col_layer)
+        if col_layer.children:
+            for child in col_layer.children:
+                Utils.find_view_layer_collection(self, col, child, col_list)
+        else:
+            return col_list
+
+    def is_valid(self, col):
+        if "*" in col.name:
+            return False
+        # if "&" in col.name:
+        #    return False
+        if col.hide_render or col.hide_viewport:
+            return False
+        vlc = bpy.context.view_layer.layer_collection
+        vlc_list = []        
+        Utils.find_view_layer_collection(self, col, vlc, vlc_list)
+        if vlc_list[0].exclude:
+            return False
+        return True
+
+    def should_merge(self, col):
+        if "&" in col.name:
+            return True
+        return False
+
+    def do_merge(self, col, export_col):
+        # get merge name
+        name = col.name.replace("&", "") # TODO replace with global
+        merge_collection.MergeCollection.merge_alone(self, col, name, export_col)
+
+    def list_all_layercollections_and_collections(self, col_list, vl):
+        col_list.append([vl, vl.collection])
+        for child in vl.children:
+            Utils.list_all_layercollections_and_collections(
+                self, col_list, child)
+        return col_list
+
+    def duplicate_collection(self, col):
+        new_name = col.name + "_DUPLICATE"
+        new_col = bpy.data.collections.new(new_name)
+        Utils.duplicate_objects(self, col, new_col)
+        return new_col
+
+    def duplicate_objects(self, old_col, new_col):
+        for obj in old_col.objects:
+            if obj.type != "MESH":
+                continue
+
+            merge_prefix = "_M_"
+            obj_data = obj.data.copy()
+            new_obj = bpy.data.objects.new(merge_prefix + obj.name, obj_data)
+            new_col.objects.link(new_obj)
+
+            new_obj.matrix_world = obj.matrix_world
+            new_obj.rotation_euler = obj.rotation_euler
+
+            for vertexGroup in obj.vertex_groups:
+                new_obj.vertex_groups.new(vertexGroup.name)
+
+            Utils.copy_modifier(self, obj, new_obj)
+
+    def copy_modifier(self, source, target):
+        active_object = source
+        target_object = target
+
+        for m_src in active_object.modifiers:
+            m_dst = target_object.modifiers.get(m_src.name, None)
+            if not m_dst:
+                m_dst = target_object.modifiers.new(m_src.name, m_src.type)
+
+            # collect names of writable properties
+            properties = [p.identifier for p in m_src.bl_rna.properties
+                          if not p.is_readonly]
+
+            # copy those properties
+            for prop in properties:
+                setattr(m_dst, prop, getattr(m_src, prop))
+
+    def setpath(self):
+        path = bpy.context.scene.FbxExportPath
+        return path

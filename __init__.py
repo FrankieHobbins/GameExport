@@ -1,0 +1,55 @@
+import importlib
+import bpy
+bl_info = {
+    "name": "Game Export",
+    "description": "A Game Exporter",
+    "author": "Frankie Hobbins",
+    "version": (1, 0, 0),
+    "blender": (2, 80, 0),
+    "wiki_url": "my github url here",
+    "tracker_url": "my github url here/issues",
+    "category": "Animation"
+}
+
+
+# When main is already in local, we know this is not the initial import...
+if "main" in locals():
+    importlib.reload(main)
+    importlib.reload(utils)
+    importlib.reload(merge_collection)
+    importlib.reload(make_list)
+    importlib.reload(ui)
+
+from . import make_list
+from . import merge_collection
+from . import utils
+from . import main
+from . import ui
+
+# main.FirstOperator.doprint()
+
+classes = (
+    main.Main,
+    utils.Utils,
+    make_list.MakeList,
+    merge_collection.MergeCollection,
+    ui.GameExportUI
+)
+
+bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path")
+
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(cls)
+
+
+if __name__ == "__main__":
+    register()
