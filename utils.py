@@ -118,9 +118,8 @@ class Utils(bpy.types.Operator):
         col_name = col_name.replace("&", "") # TODO replace with global
         path += col_name + ".fbx"
         try:
-            print(path)
-            print(o.path.dirname(path))
-            os.makedirs(o.path.dirname(path))
+            dir_name = os.path.dirname(path)
+            os.makedirs(dir_name)
         except:
             pass
 

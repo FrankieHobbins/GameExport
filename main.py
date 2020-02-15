@@ -9,14 +9,13 @@ makelist = make_list.MakeList
 
 
 class Main(bpy.types.Operator):
-    bl_label = "Mainn"
-    bl_idname = "gameexport.main"
+    bl_label = "Main"
+    bl_idname = "gameexport.export"
     bl_description = "This is where export gets called from"
 
     def execute(self, context):
         make_list.MakeList.reset(self)
-        make_list.MakeList.make_list(self)
-        # make_list.merge(self)
+        make_list.MakeList.make_list(self)        
         self.call_export()
         make_list.MakeList.clean_up(self)
         return {"FINISHED"}

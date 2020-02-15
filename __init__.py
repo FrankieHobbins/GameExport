@@ -33,7 +33,7 @@ classes = (
     utils.Utils,
     make_list.MakeList,
     merge_collection.MergeCollection,
-    ui.GameExportUI,
+    ui.PANEL_PT_gameexport,
     ui.OpenFolder
 )
 
