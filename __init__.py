@@ -33,11 +33,12 @@ classes = (
     utils.Utils,
     make_list.MakeList,
     merge_collection.MergeCollection,
-    ui.GameExportUI
+    ui.GameExportUI,
+    ui.OpenFolder
 )
 
-bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path")
-
+bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path",
+                                    subtype="DIR_PATH")
 
 def register():
     from bpy.utils import register_class

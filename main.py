@@ -22,7 +22,6 @@ class Main(bpy.types.Operator):
         return {"FINISHED"}
 
     def call_export(self):
-        
         vlc = bpy.context.view_layer.layer_collection
         # for each collection in root of scene
         for col in make_list.MakeList.list_of_collections_in_root:
@@ -44,11 +43,9 @@ class Main(bpy.types.Operator):
                     else:
                         for object in child.objects:
                             export_col.objects.link(object)
-
-            path = ut.setpath(self)
-            export_name = col.name.replace("&", "") # TODO replace with global
-            filepath = str(path + export_name + ".fbx")
-            FBXExport.export(self, filepath)
+            # set path and do export
+            path = ut.setpath(self, col.name)
+            FBXExport.export(self, path)
             bpy.data.collections.remove(export_col)
 
 

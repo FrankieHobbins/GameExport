@@ -1,4 +1,5 @@
 import bpy
+import os
 from . import merge_collection
 from . import make_list
 
@@ -110,6 +111,17 @@ class Utils(bpy.types.Operator):
             for prop in properties:
                 setattr(m_dst, prop, getattr(m_src, prop))
 
-    def setpath(self):
+    def setpath(self, col_name):
         path = bpy.context.scene.FbxExportPath
+        if path == "":
+            path = os.path.dirname(bpy.data.filepath)
+        col_name = col_name.replace("&", "") # TODO replace with global
+        path += col_name + ".fbx"
+        try:
+            print(path)
+            print(o.path.dirname(path))
+            os.makedirs(o.path.dirname(path))
+        except:
+            pass
+
         return path
