@@ -14,7 +14,8 @@ class Utils(bpy.types.Operator):
             for child in col.children:
                 col_children.append(child)
                 if child.children:
-                    Utils.get_all_children_collections(self, child, col_children)
+                    Utils.get_all_children_collections(
+                        self, child, col_children)
         return col_children
 
     def cleanup_after_export(self):
@@ -40,14 +41,14 @@ class Utils(bpy.types.Operator):
             return col_list
 
     def is_valid(self, col):
-        if "*" in col.name:
-            return False
-        # if "&" in col.name:
-        #    return False
+        exclusion_list = ["*", "cutter"]  # TODO place in user prefs
+        for i in exclusion_list:
+            if i in col.name.lower():
+                return False
         if col.hide_render or col.hide_viewport:
             return False
         vlc = bpy.context.view_layer.layer_collection
-        vlc_list = []        
+        vlc_list = []
         Utils.find_view_layer_collection(self, col, vlc, vlc_list)
         if vlc_list[0].exclude:
             return False
@@ -60,8 +61,9 @@ class Utils(bpy.types.Operator):
 
     def do_merge(self, col, export_col):
         # get merge name
-        name = col.name.replace("&", "") # TODO replace with global
-        merge_collection.MergeCollection.merge_alone(self, col, name, export_col)
+        name = col.name.replace("&", "")  # TODO replace with global
+        merge_collection.MergeCollection.merge_alone(
+            self, col, name, export_col)
 
     def list_all_layercollections_and_collections(self, col_list, vl):
         col_list.append([vl, vl.collection])
@@ -114,13 +116,29 @@ class Utils(bpy.types.Operator):
     def setpath(self, col_name):
         path = bpy.context.scene.FbxExportPath
         if path == "":
-            path = os.path.dirname(bpy.data.filepath)
-        col_name = col_name.replace("&", "") # TODO replace with global
+            path = os.path.dirname(bpy.data.filepath) + "\\"
+        elif path[1] != ":":
+            path = os.path.dirname(bpy.data.filepath) + "\\" + path
+        col_name = col_name.replace("&", "")  # TODO replace with global
         path += col_name + ".fbx"
+
         try:
             dir_name = os.path.dirname(path)
             os.makedirs(dir_name)
         except:
             pass
 
+        return path
+
+    def setpathspecialcases(self, path):
+        path = os.path.dirname(bpy.data.filepath) + "\\" + bpy.path.basename(bpy.context.blend_data.filepath)
+        if "Source~" in path:
+            path = path.replace("Source~", "")
+        if "Art_Source" in path:
+            # TODO put these in user prefs
+            path = path.replace("Art_Source", "UP_Client")
+        if ".blend" in path:
+            path = path.replace(".blend", ".fbx")
+        if ".Blend" in path:
+            path = path.replace(".Blend", ".fbx")
         return path

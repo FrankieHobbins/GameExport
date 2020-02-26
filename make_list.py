@@ -40,9 +40,7 @@ class MakeList(bpy.types.Operator):
 
     def make_list(self):
         # make collated list of all view layers and associated collection
-        utils.list_all_layercollections_and_collections(
-            self, MakeList.list_of_all_viewlayers,
-            bpy.context.view_layer.layer_collection)
+        utils.list_all_layercollections_and_collections(self, MakeList.list_of_all_viewlayers, bpy.context.view_layer.layer_collection)
 
         # find collections that need to be merged and move to new list
         for col in list(MakeList.list_of_all_viewlayers):
