@@ -29,6 +29,7 @@ class Main(bpy.types.Operator):
         vlc = bpy.context.view_layer.layer_collection
         # for each collection in root of scene
         for col in make_list.MakeList.list_of_collections_in_root:
+            objects_to_delete = []
             if not ut.is_valid(self, col):
                 continue
             # make new collection to export to & link to scene
@@ -46,12 +47,16 @@ class Main(bpy.types.Operator):
                 if ut.is_valid(self, child):
                     if ut.should_merge(self, child):
                         ut.do_merge(self, child, export_col)
+                        objects_to_delete.append(bpy.context.active_object)
                     else:
                         for object in child.objects:
                             export_col.objects.link(object)
             # set path and do export
             path = ut.setpath(self, col.name)
             FBXExport.export(self, path)
+            # cleanup
+            for ob in objects_to_delete:
+                bpy.data.objects.remove(ob)
             bpy.data.collections.remove(export_col)
 
 
@@ -61,16 +66,20 @@ class FBXExport(bpy.types.Operator):
     bl_description = "This is where export gets called from"
 
     def export(self, path):
-        bpy.ops.export_scene.fbx(
-            filepath=path,
-            **FBXExport.export_fbx_settings()
-            )
+        if (bpy.context.scene.FbxExportEngine == 'default'): # TODO make work good
+            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity())
 
-    def export_fbx_settings():
+        elif (bpy.context.scene.FbxExportEngine == 'unity'):
+            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity())
+
+        elif (bpy.context.scene.FbxExportEngine == 'unreal'):
+            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unreal())
+
+    def export_fbx_settings_unity():
         return {
             "use_selection": False,
             "use_active_collection": True,
-            "global_scale": 1.0,
+            "global_scale": bpy.context.scene.FbxExportScale,
             "apply_unit_scale": True,
             # "apply_scale_options": 'FBX_SCALE_NONE',
             "apply_scale_options": 'FBX_SCALE_ALL',
@@ -83,14 +92,14 @@ class FBXExport(bpy.types.Operator):
             "use_mesh_edges": False,
             "use_tspace": False,
             "use_custom_props": False,
-            "add_leaf_bones": True,
+            "add_leaf_bones": False,
             "primary_bone_axis": 'Y',
             "secondary_bone_axis": 'X',
-            "use_armature_deform_only": False,
+            "use_armature_deform_only": True,
             "armature_nodetype": 'NULL',
             "bake_anim": True,
             "bake_anim_use_all_bones": True,
-            "bake_anim_use_nla_strips": True,
+            "bake_anim_use_nla_strips": False,
             "bake_anim_use_all_actions": True,
             "bake_anim_force_startend_keying": True,
             "bake_anim_step": 1.0,
@@ -103,6 +112,42 @@ class FBXExport(bpy.types.Operator):
             "axis_up": 'Y',
         }
 
+    def export_fbx_settings_unreal():
+        return {
+            "use_selection": False,
+            "use_active_collection": True,
+            "global_scale": bpy.context.scene.FbxExportScale,
+            "apply_unit_scale": True,
+            "apply_scale_options": 'FBX_SCALE_NONE',            
+            "bake_space_transform": False,
+            "object_types": {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'},
+            "use_mesh_modifiers": True,
+            "use_mesh_modifiers_render": True,
+            "mesh_smooth_type": 'OFF',
+            "use_subsurf": False,
+            "use_mesh_edges": False,
+            "use_tspace": False,
+            "use_custom_props": False,
+            "add_leaf_bones": False,
+            "primary_bone_axis": 'Y',
+            "secondary_bone_axis": 'X',
+            "use_armature_deform_only": True,
+            "armature_nodetype": 'NULL',
+            "bake_anim": True,
+            "bake_anim_use_all_bones": True,
+            "bake_anim_use_nla_strips": False,
+            "bake_anim_use_all_actions": True,
+            "bake_anim_force_startend_keying": True,
+            "bake_anim_step": 1.0,
+            "bake_anim_simplify_factor": 1.0,
+            "path_mode": 'AUTO',
+            "embed_textures": False,
+            "batch_mode": 'OFF',
+            "use_batch_own_dir": True,
+            "axis_forward": '-Z',
+            "axis_up": 'Y',
+        }        
+
     def export_entire_scene(self, path):
         bpy.ops.export_scene.fbx(
             filepath=path,
@@ -113,7 +158,7 @@ class FBXExport(bpy.types.Operator):
         return {
             "use_selection": False,
             "use_active_collection": False,
-            "global_scale": 1.0,
+            "global_scale": bpy.context.scene.FbxExportScale,
             "apply_unit_scale": True,
             # "apply_scale_options": 'FBX_SCALE_NONE',
             "apply_scale_options": 'FBX_SCALE_ALL',
@@ -126,14 +171,14 @@ class FBXExport(bpy.types.Operator):
             "use_mesh_edges": False,
             "use_tspace": False,
             "use_custom_props": False,
-            "add_leaf_bones": True,
+            "add_leaf_bones": False,
             "primary_bone_axis": 'Y',
             "secondary_bone_axis": 'X',
-            "use_armature_deform_only": False,
+            "use_armature_deform_only": True,
             "armature_nodetype": 'NULL',
             "bake_anim": True,
             "bake_anim_use_all_bones": True,
-            "bake_anim_use_nla_strips": True,
+            "bake_anim_use_nla_strips": False,
             "bake_anim_use_all_actions": True,
             "bake_anim_force_startend_keying": True,
             "bake_anim_step": 1.0,

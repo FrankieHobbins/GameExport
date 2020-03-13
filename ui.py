@@ -14,19 +14,15 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row.operator("gameexport.export", text="Export")
         row = layout.row()
         row.prop(context.scene, "FbxExportPath", text="")
+        row = layout.row()
+        row.prop(context.scene, "FbxExportScale", text="scale")
+        row = layout.row()
+        row.prop(context.scene, "FbxExportEngine", text="engine")
         # row.operator('gameexport.openfolder', text='Path')
 
 
 class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
     bl_idname = __package__
-
-    add_bevel: bpy.props.EnumProperty(
-        items=[
-            ('bevel', 'Add bevel', '', '', 0),
-            ('no_bevel', 'No bevel', '', '', 1)
-        ],
-        default='no_bevel'
-    )
 
     special_source_workflow: bpy.props.BoolProperty(
         name="Unity Source Workflow",
@@ -34,9 +30,18 @@ class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
     )
 
     default_unity_fbx: bpy.props.BoolProperty(
-        name="Match unity builtin FBX",
+        name="Match unity built in FBX",
         default=False
     )
+
+    default_engine_export: bpy.props.EnumProperty(
+        name = "Default Engine",
+        items=[
+            ('unity', 'Unity', '', '', 0),
+            ('unreal', 'Unreal', '', '', 1)
+        ],
+        default='unity'
+)
 
     def draw(self, context):
         layout = self.layout
@@ -46,7 +51,7 @@ class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
         # layout.label(text='Testing:')
         row = layout.row()
         row.prop(self, 'special_source_workflow', expand=True)
-        row.prop(self, 'default_unity_fbx', expand=True)
+        row.prop(self, 'default_engine_export', expand=False)
 
 
 class OpenFolder(bpy.types.Operator):

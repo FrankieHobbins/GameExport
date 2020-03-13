@@ -33,6 +33,7 @@ class MergeCollection(bpy.types.Operator):
         # copy and rename
         col_copy = utils.Utils.duplicate_collection(self, col)
         col_copy.name = name
+        col_copy.name = name
 
         # link to target collection
         target_col.children.link(col_copy)

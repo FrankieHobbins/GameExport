@@ -38,8 +38,16 @@ classes = (
     ui.PANEL_PT_gameexport_addon_prefs
 )
 
-bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path",
-                                    subtype="DIR_PATH")
+bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", subtype="DIR_PATH")
+bpy.types.Scene.FbxExportScale = bpy.props.FloatProperty(name="FbxExportScale", default=1.0)
+bpy.types.Scene.FbxExportEngine = bpy.props.EnumProperty(
+        items=[
+            ('default', 'Default', '', '', 0),
+            ('unity', 'Unity', '', '', 1),
+            ('unreal', 'Unreal', '', '', 2)
+        ],
+        default='unity'
+)
 
 
 def register():
