@@ -18,6 +18,10 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row.prop(context.scene, "FbxExportScale", text="scale")
         row = layout.row()
         row.prop(context.scene, "FbxExportEngine", text="engine")
+        row = layout.row()
+        row.prop(context.scene, "FBXExportSelected", text="Export Selected")
+        row = layout.row()
+        row.prop(context.scene, "FBXExportColletionIsFolder", text="Collection is Folder")
         # row.operator('gameexport.openfolder', text='Path')
 
 
@@ -35,7 +39,7 @@ class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
     )
 
     default_engine_export: bpy.props.EnumProperty(
-        name = "Default Engine",
+        name="Default Engine",
         items=[
             ('unity', 'Unity', '', '', 0),
             ('unreal', 'Unreal', '', '', 1)

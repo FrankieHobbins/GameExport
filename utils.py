@@ -120,6 +120,10 @@ class Utils(bpy.types.Operator):
         elif path[1] != ":":
             path = os.path.dirname(bpy.data.filepath) + "\\" + path
         col_name = col_name.replace("&", "")  # TODO replace with global
+
+        if bpy.types.Scene.FBXExportColletionIsFolder or "\\" in col_name:
+            col_name = col_name + "\\" + col_name
+
         path += col_name + ".fbx"
 
         try:

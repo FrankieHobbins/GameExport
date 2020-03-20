@@ -20,13 +20,14 @@ class Main(bpy.types.Operator):
 
         else:
             make_list.MakeList.reset(self)
-            make_list.MakeList.make_list(self)        
+            make_list.MakeList.make_list(self)
             self.call_export()
             make_list.MakeList.clean_up(self)
         return {"FINISHED"}
 
     def call_export(self):
         vlc = bpy.context.view_layer.layer_collection
+        active_collection = bpy.context.collection
         # for each collection in root of scene
         for col in make_list.MakeList.list_of_collections_in_root:
             objects_to_delete = []
@@ -55,10 +56,11 @@ class Main(bpy.types.Operator):
             path = ut.setpath(self, col.name)
             FBXExport.export(self, path)
             # cleanup
+            export_col.name = "Collection To Delete"
             for ob in objects_to_delete:
                 bpy.data.objects.remove(ob)
             bpy.data.collections.remove(export_col)
-
+            bpy.context.view_layer.active_layer_collection = bpy.context.view_layer.layer_collection.children[active_collection.name]       
 
 class FBXExport(bpy.types.Operator):
     bl_label = "Export FBX"
@@ -66,7 +68,7 @@ class FBXExport(bpy.types.Operator):
     bl_description = "This is where export gets called from"
 
     def export(self, path):
-        if (bpy.context.scene.FbxExportEngine == 'default'): # TODO make work good
+        if (bpy.context.scene.FbxExportEngine == 'default'):  # TODO make work good
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity())
 
         elif (bpy.context.scene.FbxExportEngine == 'unity'):
