@@ -45,7 +45,7 @@ class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
             ('unreal', 'Unreal', '', '', 1)
         ],
         default='unity'
-)
+    )
 
     def draw(self, context):
         layout = self.layout

@@ -45,8 +45,9 @@ class Utils(bpy.types.Operator):
         for i in exclusion_list:
             if i in col.name.lower():
                 return False
-        if col.hide_render or col.hide_viewport:
+        if col.hide_viewport: # or col.hide_render ??
             return False
+        # TODO also check for parent
         vlc = bpy.context.view_layer.layer_collection
         vlc_list = []
         Utils.find_view_layer_collection(self, col, vlc, vlc_list)

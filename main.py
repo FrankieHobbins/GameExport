@@ -26,12 +26,15 @@ class Main(bpy.types.Operator):
         return {"FINISHED"}
 
     def call_export(self):
-        vlc = bpy.context.view_layer.layer_collection
-        active_collection = bpy.context.collection
+        vlc = bpy.context.view_layer.layer_collection       
+        active_vlc = bpy.context.view_layer.active_layer_collection
+        selected_objects = bpy.context.selected_objects
+        active_object = bpy.context.active_object
         # for each collection in root of scene
         for col in make_list.MakeList.list_of_collections_in_root:
             objects_to_delete = []
             if not ut.is_valid(self, col):
+                print("not valid")
                 continue
             # make new collection to export to & link to scene
             export_col = bpy.data.collections.new("EXPORT")
@@ -60,7 +63,9 @@ class Main(bpy.types.Operator):
             for ob in objects_to_delete:
                 bpy.data.objects.remove(ob)
             bpy.data.collections.remove(export_col)
-            bpy.context.view_layer.active_layer_collection = bpy.context.view_layer.layer_collection.children[active_collection.name]       
+        bpy.context.view_layer.active_layer_collection = active_vlc
+        bpy.context.view_layer.objects.active = active_object
+        bpy.context.view_layer.objects.selected = selected_objects
 
 class FBXExport(bpy.types.Operator):
     bl_label = "Export FBX"
@@ -120,7 +125,7 @@ class FBXExport(bpy.types.Operator):
             "use_active_collection": True,
             "global_scale": bpy.context.scene.FbxExportScale,
             "apply_unit_scale": True,
-            "apply_scale_options": 'FBX_SCALE_NONE',            
+            "apply_scale_options": 'FBX_SCALE_NONE',
             "bake_space_transform": False,
             "object_types": {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'},
             "use_mesh_modifiers": True,
@@ -148,13 +153,10 @@ class FBXExport(bpy.types.Operator):
             "use_batch_own_dir": True,
             "axis_forward": '-Z',
             "axis_up": 'Y',
-        }        
+        }
 
     def export_entire_scene(self, path):
-        bpy.ops.export_scene.fbx(
-            filepath=path,
-            **FBXExport.export_fbx_settings_entire_scene()
-            )
+        bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_entire_scene())
 
     def export_fbx_settings_entire_scene():
         return {

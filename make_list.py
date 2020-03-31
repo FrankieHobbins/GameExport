@@ -35,8 +35,6 @@ class MakeList(bpy.types.Operator):
     def execute(self, context):
         self.reset()
         self.make_list()
-        # self.merge()
-        # self.clean_up()
         return {"FINISHED"}
 
     def make_list(self):
