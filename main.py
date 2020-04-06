@@ -7,34 +7,89 @@ merge_collection = merge_collection.MergeCollection
 ut = utils.Utils
 makelist = make_list.MakeList
 
+"""
+class ExportBake
+    bl_label = "Main"
+    bl_idname = "gameexport.export"
+    bl_description = "This is where export gets called from"
+
+    def execute(self, context)
+"""
+
 
 class Main(bpy.types.Operator):
     bl_label = "Main"
     bl_idname = "gameexport.export"
     bl_description = "This is where export gets called from"
 
-    def execute(self, context):
-        if bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
-            path = ut.setpathspecialcases(self, "")
-            FBXExport.export_entire_scene(self, path)
+    bake: bpy.props.BoolProperty(
+        name="bake",
+        default=False
+    )
 
+    def execute(self, context):
+        if self.bake:
+            self.call_export_bake()
         else:
-            make_list.MakeList.reset(self)
-            make_list.MakeList.make_list(self)
-            self.call_export()
-            make_list.MakeList.clean_up(self)
+            if bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
+                path = ut.setpathspecialcases(self, "")
+                self.call_export_single(path, [])
+            else:
+                make_list.MakeList.reset(self)
+                make_list.MakeList.make_list(self)
+                self.call_export()
+                make_list.MakeList.clean_up(self)
         return {"FINISHED"}
 
+    def call_export_bake(self):
+        path = ut.setpathspecialcases(self, "")
+        self.call_export_single(path.replace(".fbx", "_high.fbx"), ["low_", "lo_", "_low", "_lo"])  # export high
+        self.call_export_single(path.replace(".fbx", "_low.fbx"), ["high_", "hi_", "_high", "_h i"])  # export low
+
+    def call_export_single(self, path, exclude_list):
+        # exports a single FBX
+        # TODO: support merging collections
+        vlc = bpy.context.view_layer.layer_collection
+        active_vlc = bpy.context.view_layer.active_layer_collection
+        selected_objects = bpy.context.selected_objects
+        active_object = bpy.context.active_object
+        list_of_collections = list(bpy.data.collections)  # copy not clone list
+        # make export collection ready to take objects
+        export_col = bpy.data.collections.new("EXPORT")
+        bpy.context.scene.collection.children.link(export_col)
+        # add all objects to export collections
+        for col in list_of_collections:
+            # if collection is valid
+            if not ut.is_valid(self, col, exclude_list):
+                print(f"col {col.name} is not valid")
+                continue
+            # add objects to export collection
+            for child in col.objects:
+                export_col.objects.link(child)
+        # find view layer collection of export_col and set it active
+        ecl_list = []
+        ut.find_view_layer_collection(self, export_col, vlc, ecl_list)
+        bpy.context.view_layer.active_layer_collection = ecl_list[0]
+        # set path and do export
+        FBXExport.export(self, path)
+        # cleanup
+        export_col.name = "Collection To Delete"
+        bpy.data.collections.remove(export_col)
+
+        bpy.context.view_layer.active_layer_collection = active_vlc
+        bpy.context.view_layer.objects.active = active_object
+        bpy.context.view_layer.objects.selected = selected_objects
+
     def call_export(self):
-        vlc = bpy.context.view_layer.layer_collection       
+        vlc = bpy.context.view_layer.layer_collection
         active_vlc = bpy.context.view_layer.active_layer_collection
         selected_objects = bpy.context.selected_objects
         active_object = bpy.context.active_object
         # for each collection in root of scene
         for col in make_list.MakeList.list_of_collections_in_root:
             objects_to_delete = []
-            if not ut.is_valid(self, col):
-                print("not valid")
+            if not ut.is_valid(self, col, []):
+                print(f"col {col.name} is not valid")
                 continue
             # make new collection to export to & link to scene
             export_col = bpy.data.collections.new("EXPORT")

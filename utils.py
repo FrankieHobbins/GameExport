@@ -40,12 +40,13 @@ class Utils(bpy.types.Operator):
         else:
             return col_list
 
-    def is_valid(self, col):
+    def is_valid(self, col, extra_exclusion_list):
         exclusion_list = ["*", "cutter"]  # TODO place in user prefs
+        exclusion_list += extra_exclusion_list
         for i in exclusion_list:
-            if i in col.name.lower():
+            if i.lower() in col.name.lower():
                 return False
-        if col.hide_viewport: # or col.hide_render ??
+        if col.hide_viewport:  # or col.hide_render ??
             return False
         # TODO also check for parent
         vlc = bpy.context.view_layer.layer_collection

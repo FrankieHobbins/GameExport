@@ -11,7 +11,11 @@ class PANEL_PT_gameexport(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         row = layout.row()
-        row.operator("gameexport.export", text="Export")
+        props = layout.operator("gameexport.export", text="Export")
+        props.bake = False
+        row = layout.row()
+        props = layout.operator("gameexport.export", text="Bake")
+        props.bake = True
         row = layout.row()
         row.prop(context.scene, "FbxExportPath", text="")
         row = layout.row()
@@ -49,10 +53,6 @@ class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
-        # layout.label(text='Add bevel modifier:')
-        # row = layout.row()
-        # row.prop(self, 'add_bevel', expand=True)
-        # layout.label(text='Testing:')
         row = layout.row()
         row.prop(self, 'special_source_workflow', expand=True)
         row.prop(self, 'default_engine_export', expand=False)
