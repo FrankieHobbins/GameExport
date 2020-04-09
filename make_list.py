@@ -22,7 +22,6 @@ class MakeList(bpy.types.Operator):
 
     def reset(self):
         # make sure clean at start
-        print("reset")
         MakeList.list_of_collections_in_root = []
         MakeList.list_of_collections = []
         MakeList.list_of_all_viewlayers = []
@@ -47,7 +46,7 @@ class MakeList(bpy.types.Operator):
                 MakeList.list_of_collections_to_merge.append(col[1])
 
         # make list of all collections in root
-        if bpy.types.Scene.FBXExportSelected:
+        if bpy.context.scene.FBXExportSelected:
             MakeList.list_of_collections_in_root.append(bpy.context.collection)
         else:
             for col in bpy.context.view_layer.layer_collection.children:

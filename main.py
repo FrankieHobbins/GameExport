@@ -29,12 +29,16 @@ class Main(bpy.types.Operator):
 
     def execute(self, context):
         if self.bake:
+            print("exporting bake")
             self.call_export_bake()
         else:
+            
             if bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
+                print("exporting standard - special source workflow")
                 path = ut.setpathspecialcases(self, "")
                 self.call_export_single(path, [])
             else:
+                print("exporting standard")
                 make_list.MakeList.reset(self)
                 make_list.MakeList.make_list(self)
                 self.call_export()
@@ -42,13 +46,16 @@ class Main(bpy.types.Operator):
         return {"FINISHED"}
 
     def call_export_bake(self):
-        path = ut.setpathspecialcases(self, "")
+        if bpy.context.scene.FbxExportPath == "":
+            path = ut.setpathspecialcases(self, "")
+        else:
+            path = ut.setpath(self, "CHANGE_ME")
         self.call_export_single(path.replace(".fbx", "_high.fbx"), ["low_", "lo_", "_low", "_lo"])  # export high
-        self.call_export_single(path.replace(".fbx", "_low.fbx"), ["high_", "hi_", "_high", "_h i"])  # export low
+        self.call_export_single(path.replace(".fbx", "_low.fbx"), ["high_", "hi_", "_high", "_hi"])  # export low
 
     def call_export_single(self, path, exclude_list):
         # exports a single FBX
-        # TODO: support merging collections
+        objects_to_delete = []
         vlc = bpy.context.view_layer.layer_collection
         active_vlc = bpy.context.view_layer.active_layer_collection
         selected_objects = bpy.context.selected_objects
@@ -61,11 +68,17 @@ class Main(bpy.types.Operator):
         for col in list_of_collections:
             # if collection is valid
             if not ut.is_valid(self, col, exclude_list):
-                print(f"col {col.name} is not valid")
+                print(f"collection {col.name} is not valid")
                 continue
-            # add objects to export collection
-            for child in col.objects:
-                export_col.objects.link(child)
+            # merge if needed & add objects to export collection
+            if ut.should_merge(self, col):
+                print(f"collection {col.name} is getting merged")
+                ut.do_merge(self, col, export_col)
+                objects_to_delete.append(bpy.context.active_object)
+            else:
+                for child in col.objects:
+                    print(child.name)
+                    export_col.objects.link(child)
         # find view layer collection of export_col and set it active
         ecl_list = []
         ut.find_view_layer_collection(self, export_col, vlc, ecl_list)
@@ -73,12 +86,14 @@ class Main(bpy.types.Operator):
         # set path and do export
         FBXExport.export(self, path)
         # cleanup
+        for ob in objects_to_delete:
+            bpy.data.objects.remove(ob)
         export_col.name = "Collection To Delete"
         bpy.data.collections.remove(export_col)
-
         bpy.context.view_layer.active_layer_collection = active_vlc
         bpy.context.view_layer.objects.active = active_object
-        bpy.context.view_layer.objects.selected = selected_objects
+        for ob in selected_objects:
+            ob.select_set(state=True)
 
     def call_export(self):
         vlc = bpy.context.view_layer.layer_collection
@@ -89,8 +104,9 @@ class Main(bpy.types.Operator):
         for col in make_list.MakeList.list_of_collections_in_root:
             objects_to_delete = []
             if not ut.is_valid(self, col, []):
-                print(f"col {col.name} is not valid")
+                print(f"collection {col.name} is not valid")
                 continue
+
             # make new collection to export to & link to scene
             export_col = bpy.data.collections.new("EXPORT")
             vlc.collection.children.link(export_col)
@@ -103,7 +119,9 @@ class Main(bpy.types.Operator):
             ut.get_all_children_collections(self, col, children)
             children.append(col)
             for child in children:
-                if ut.is_valid(self, child):
+                if child == export_col:
+                    continue
+                if ut.is_valid(self, child, []):
                     if ut.should_merge(self, child):
                         ut.do_merge(self, child, export_col)
                         objects_to_delete.append(bpy.context.active_object)
@@ -112,6 +130,7 @@ class Main(bpy.types.Operator):
                             export_col.objects.link(object)
             # set path and do export
             path = ut.setpath(self, col.name)
+            print(f"~~~ exporting {col.name} to {path} ~~~")
             FBXExport.export(self, path)
             # cleanup
             export_col.name = "Collection To Delete"
@@ -120,7 +139,9 @@ class Main(bpy.types.Operator):
             bpy.data.collections.remove(export_col)
         bpy.context.view_layer.active_layer_collection = active_vlc
         bpy.context.view_layer.objects.active = active_object
-        bpy.context.view_layer.objects.selected = selected_objects
+        for ob in selected_objects:
+            ob.select_set(state=True)
+
 
 class FBXExport(bpy.types.Operator):
     bl_label = "Export FBX"

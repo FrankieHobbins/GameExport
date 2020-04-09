@@ -52,11 +52,14 @@ class Utils(bpy.types.Operator):
         vlc = bpy.context.view_layer.layer_collection
         vlc_list = []
         Utils.find_view_layer_collection(self, col, vlc, vlc_list)
-        if vlc_list[0].exclude:
-            return False
+        if len(vlc_list) > 0:
+            if vlc_list[0].exclude:
+                return False
         return True
 
     def should_merge(self, col):
+        if not col.objects:
+            return False
         if "&" in col.name:
             return True
         return False
@@ -123,7 +126,7 @@ class Utils(bpy.types.Operator):
             path = os.path.dirname(bpy.data.filepath) + "\\" + path
         col_name = col_name.replace("&", "")  # TODO replace with global
 
-        if bpy.types.Scene.FBXExportColletionIsFolder or "\\" in col_name:
+        if bpy.context.scene.FBXExportColletionIsFolder or "\\" in col_name:
             col_name = col_name + "\\" + col_name
 
         path += col_name + ".fbx"
