@@ -35,7 +35,7 @@ class Main(bpy.types.Operator):
             
             if bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
                 print("exporting standard - special source workflow")
-                path = ut.setpathspecialcases(self, "")
+                path = ut.setpathspecialcases(self, "", false)
                 self.call_export_single(path, [])
             else:
                 print("exporting standard")
@@ -47,13 +47,13 @@ class Main(bpy.types.Operator):
 
     def call_export_bake(self):
         if bpy.context.scene.FbxExportPath == "":
-            path = ut.setpathspecialcases(self, "")
+            path = ut.setpathspecialcases(self, "", True)
         else:
             path = ut.setpath(self, "CHANGE_ME")
-        self.call_export_single(path.replace(".fbx", "_high.fbx"), ["low_", "lo_", "_low", "_lo"])  # export high
-        self.call_export_single(path.replace(".fbx", "_low.fbx"), ["high_", "hi_", "_high", "_hi"])  # export low
+        self.call_export_single(path.replace(".fbx", "_high.fbx"), "high")  # export high
+        self.call_export_single(path.replace(".fbx", "_low.fbx"), "low")  # export low
 
-    def call_export_single(self, path, exclude_list):
+    def call_export_single(self, path, bake):
         # exports a single FBX
         objects_to_delete = []
         vlc = bpy.context.view_layer.layer_collection
@@ -67,9 +67,11 @@ class Main(bpy.types.Operator):
         # add all objects to export collections
         for col in list_of_collections:
             # if collection is valid
-            if not ut.is_valid(self, col, exclude_list):
-                print(f"collection {col.name} is not valid")
+            if not ut.is_valid(self, col, bake):
+                print(f"collection {col.name} is not valid --")
                 continue
+            else:
+                print(f"collection {col.name} is valid ++")
             # merge if needed & add objects to export collection
             if ut.should_merge(self, col):
                 print(f"collection {col.name} is getting merged")
@@ -103,9 +105,11 @@ class Main(bpy.types.Operator):
         # for each collection in root of scene
         for col in make_list.MakeList.list_of_collections_in_root:
             objects_to_delete = []
-            if not ut.is_valid(self, col, []):
-                print(f"collection {col.name} is not valid")
+            if not ut.is_valid(self, col, ""):
+                print(f"collection {col.name} is not valid --")
                 continue
+            else:
+                print(f"collection {col.name} is valid ++")
 
             # make new collection to export to & link to scene
             export_col = bpy.data.collections.new("EXPORT")
@@ -121,7 +125,7 @@ class Main(bpy.types.Operator):
             for child in children:
                 if child == export_col:
                     continue
-                if ut.is_valid(self, child, []):
+                if ut.is_valid(self, child, ""):
                     if ut.should_merge(self, child):
                         ut.do_merge(self, child, export_col)
                         objects_to_delete.append(bpy.context.active_object)

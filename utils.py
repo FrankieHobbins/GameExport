@@ -40,9 +40,23 @@ class Utils(bpy.types.Operator):
         else:
             return col_list
 
-    def is_valid(self, col, extra_exclusion_list):
+    def is_valid(self, col, bake):
+        low = ["low_", "lo_", "_low", "_lo"]
+        high = ["high_", "hi_", "_high", "_hi"]
+        found = False
+        if bake == "low":
+            for i in low:
+                if i in col.name.lower():
+                    found = True
+            if not found:
+                return False
+        if bake == "high":
+            for i in high:
+                if i in col.name.lower():
+                    found = True
+            if not found:
+                return False
         exclusion_list = ["*", "cutter"]  # TODO place in user prefs
-        exclusion_list += extra_exclusion_list
         for i in exclusion_list:
             if i.lower() in col.name.lower():
                 return False
@@ -139,13 +153,14 @@ class Utils(bpy.types.Operator):
 
         return path
 
-    def setpathspecialcases(self, path):
+    def setpathspecialcases(self, path, bake):
         path = os.path.dirname(bpy.data.filepath) + "\\" + bpy.path.basename(bpy.context.blend_data.filepath)
-        if "Source~" in path:
-            path = path.replace("Source~", "")
-        if "Art_Source" in path:
-            # TODO put these in user prefs
-            path = path.replace("Art_Source", "UP_Client")
+        if not bake:
+            if "Source~" in path:
+                path = path.replace("Source~", "")
+            if "Art_Source" in path:
+                # TODO put these in user prefs
+                path = path.replace("Art_Source", "UP_Client")
         if ".blend" in path:
             path = path.replace(".blend", ".fbx")
         if ".Blend" in path:
