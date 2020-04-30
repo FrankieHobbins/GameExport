@@ -45,16 +45,10 @@ class Utils(bpy.types.Operator):
         high = ["high_", "hi_", "_high", "_hi"]
         found = False
         if bake == "low":
-            for i in low:
-                if i in col.name.lower():
-                    found = True
-            if not found:
+            if not any(col.name.lower().find(el) != -1 for el in low):
                 return False
         if bake == "high":
-            for i in high:
-                if i in col.name.lower():
-                    found = True
-            if not found:
+            if not any(col.name.lower().find(el) != -1 for el in high):
                 return False
         exclusion_list = ["*", "cutter"]  # TODO place in user prefs
         for i in exclusion_list:
@@ -81,8 +75,7 @@ class Utils(bpy.types.Operator):
     def do_merge(self, col, export_col):
         # get merge name
         name = col.name.replace("&", "")  # TODO replace with global
-        merge_collection.MergeCollection.merge_alone(
-            self, col, name, export_col)
+        merge_collection.MergeCollection.merge_alone(self, col, name, export_col)
 
     def list_all_layercollections_and_collections(self, col_list, vl):
         col_list.append([vl, vl.collection])

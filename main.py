@@ -32,7 +32,6 @@ class Main(bpy.types.Operator):
             print("exporting bake")
             self.call_export_bake()
         else:
-            
             if bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
                 print("exporting standard - special source workflow")
                 path = ut.setpathspecialcases(self, "", false)
@@ -49,30 +48,35 @@ class Main(bpy.types.Operator):
         if bpy.context.scene.FbxExportPath == "":
             path = ut.setpathspecialcases(self, "", True)
         else:
-            path = ut.setpath(self, "CHANGE_ME")
+            path = ut.setpath(self, bpy.path.basename(bpy.context.blend_data.filepath.replace(".blend", "")))
         self.call_export_single(path.replace(".fbx", "_high.fbx"), "high")  # export high
         self.call_export_single(path.replace(".fbx", "_low.fbx"), "low")  # export low
 
     def call_export_single(self, path, bake):
-        # exports a single FBX
+        # definitions
         objects_to_delete = []
         vlc = bpy.context.view_layer.layer_collection
         active_vlc = bpy.context.view_layer.active_layer_collection
         selected_objects = bpy.context.selected_objects
         active_object = bpy.context.active_object
+        print(f"active object is{active_object}")
         list_of_collections = list(bpy.data.collections)  # copy not clone list
         # make export collection ready to take objects
         export_col = bpy.data.collections.new("EXPORT")
         bpy.context.scene.collection.children.link(export_col)
-        # add all objects to export collections
+        # find high or low collection & add all children collections
         for col in list_of_collections:
-            # if collection is valid
             if not ut.is_valid(self, col, bake):
-                print(f"collection {col.name} is not valid --")
                 continue
             else:
                 print(f"collection {col.name} is valid ++")
-            # merge if needed & add objects to export collection
+            collections = [col]
+            ut.get_all_children_collections(self, col, collections)
+        # now we have a list of collections to export
+        for col in collections:
+            if not ut.is_valid(self, col, ""):
+                continue
+            # add objects to export collection & merge if needed
             if ut.should_merge(self, col):
                 print(f"collection {col.name} is getting merged")
                 ut.do_merge(self, col, export_col)
