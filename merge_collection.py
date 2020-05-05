@@ -24,7 +24,7 @@ class MergeCollection(bpy.types.Operator):
             bpy.ops.object.duplicates_make_real()
             obj_list += bpy.context.selected_editable_objects
         # select objects and join
-        if len(obj_list) > 0:            
+        if len(obj_list) > 0:
             bpy.context.view_layer.objects.active = obj_list[0]
             c["active_object"] = obj_list[0]
             c["selected_editable_objects"] = obj_list
