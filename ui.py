@@ -25,6 +25,8 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FBXExportSelected", text="Export Selected")
         row = layout.row()
+        row.prop(context.scene, "FBXExportSM", text="Static Mesh ")
+        row = layout.row()
         row.prop(context.scene, "FBXExportColletionIsFolder", text="Collection is Folder")
         # row.operator('gameexport.openfolder', text='Path')
 

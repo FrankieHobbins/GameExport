@@ -49,6 +49,7 @@ bpy.types.Scene.FbxExportEngine = bpy.props.EnumProperty(
         default='unity'
         )
 bpy.types.Scene.FBXExportSelected = bpy.props.BoolProperty(name="FBXExportSelected", default=False)
+bpy.types.Scene.FBXExportSM = bpy.props.BoolProperty(name="FBXExportSM", default=False)
 bpy.types.Scene.FBXExportColletionIsFolder = bpy.props.BoolProperty(name="FBXExportColletionIsFolder", default=False)
 
 

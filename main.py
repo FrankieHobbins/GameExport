@@ -30,18 +30,20 @@ class Main(bpy.types.Operator):
     def execute(self, context):
         if self.bake:
             print("exporting bake")
-            self.call_export_bake()
+            self.call_export_bake()        
+        elif bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
+            print("exporting standard - special source workflow")
+            path = ut.setpathspecialcases(self, "", False)
+            self.call_export_single(path, [])
         else:
-            if bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
-                print("exporting standard - special source workflow")
-                path = ut.setpathspecialcases(self, "", False)
-                self.call_export_single(path, [])
+            print("exporting standard")
+            make_list.MakeList.reset(self)
+            make_list.MakeList.make_list(self)
+            if bpy.context.scene.FBXExportSM:
+                self.call_export_objects()
             else:
-                print("exporting standard")
-                make_list.MakeList.reset(self)
-                make_list.MakeList.make_list(self)
                 self.call_export()
-                make_list.MakeList.clean_up(self)
+            make_list.MakeList.clean_up(self)
         return {"FINISHED"}
 
     def call_export_bake(self):
@@ -140,6 +142,58 @@ class Main(bpy.types.Operator):
             path = ut.setpath(self, col.name)
             print(f"~~~ exporting {col.name} to {path} ~~~")
             FBXExport.export(self, path)
+            # cleanup
+            export_col.name = "Collection To Delete"
+            for ob in objects_to_delete:
+                bpy.data.objects.remove(ob)
+            bpy.data.collections.remove(export_col)
+        bpy.context.view_layer.active_layer_collection = active_vlc
+        bpy.context.view_layer.objects.active = active_object
+        for ob in selected_objects:
+            ob.select_set(state=True)
+
+    def call_export_objects(self):
+        vlc = bpy.context.view_layer.layer_collection
+        active_vlc = bpy.context.view_layer.active_layer_collection
+        selected_objects = bpy.context.selected_objects
+        active_object = bpy.context.active_object
+        # for each collection in root of scene
+        for col in make_list.MakeList.list_of_collections_in_root:
+            objects_to_delete = []
+            if not ut.is_valid(self, col, ""):
+                print(f"collection {col.name} is not valid --")
+                continue
+            else:
+                print(f"collection {col.name} is valid ++") 
+            # make new collection to export to & link to scene
+            export_col = bpy.data.collections.new("EXPORT")
+            vlc.collection.children.link(export_col)
+            # find view layer collection of export_col and set it active
+            ecl_list = []
+            ut.find_view_layer_collection(self, export_col, vlc, ecl_list)
+            bpy.context.view_layer.active_layer_collection = ecl_list[0]
+            # populate export collection with objects
+            children = []
+            ut.get_all_children_collections(self, col, children)
+            children.append(col)
+            for child in children:
+                if child == export_col:
+                    continue
+                if ut.is_valid(self, child, ""):
+                    if ut.should_merge(self, child):
+                        ut.do_merge(self, child, export_col)
+                        objects_to_delete.append(bpy.context.active_object)
+                    else:
+                        for object in child.objects:
+                            obj_pos = object.location.copy()
+                            object.location = (0, 0, 0)
+                            export_col.objects.link(object)
+                            # set path and do export
+                            path = ut.setpath(self, "SM_" + object.name)
+                            print(f"~~~ exporting {object.name} to {path} ~~~")
+                            FBXExport.export(self, path)
+                            object.location = obj_pos
+                            export_col.objects.unlink(object)
             # cleanup
             export_col.name = "Collection To Delete"
             for ob in objects_to_delete:
