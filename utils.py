@@ -104,7 +104,7 @@ class Utils(bpy.types.Operator):
             new_obj.rotation_euler = obj.rotation_euler
 
             for vertexGroup in obj.vertex_groups:
-                new_obj.vertex_groups.new(vertexGroup.name)
+                new_obj.vertex_groups.new(name=vertexGroup.name)
 
             Utils.copy_modifier(self, obj, new_obj)
 
