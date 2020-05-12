@@ -28,22 +28,31 @@ class Main(bpy.types.Operator):
     )
 
     def execute(self, context):
+        make_list.MakeList.reset(self)
+        make_list.MakeList.make_list(self)
+
+        # for baking
         if self.bake:
             print("exporting bake")
-            self.call_export_bake()        
+            self.call_export_bake()
+
+        # for special up workflow
         elif bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
             print("exporting standard - special source workflow")
             path = ut.setpathspecialcases(self, "", False)
             self.call_export_single(path, [])
+
+        # for unreal static mesh workflow
+        elif bpy.context.scene.FBXExportSM:
+            print("exporting SM")
+            self.call_export_objects()
+
+        # standard export
         else:
             print("exporting standard")
-            make_list.MakeList.reset(self)
-            make_list.MakeList.make_list(self)
-            if bpy.context.scene.FBXExportSM:
-                self.call_export_objects()
-            else:
-                self.call_export()
-            make_list.MakeList.clean_up(self)
+            self.call_export()
+
+        make_list.MakeList.clean_up(self)
         return {"FINISHED"}
 
     def call_export_bake(self):
@@ -57,10 +66,7 @@ class Main(bpy.types.Operator):
     def call_export_single(self, path, bake):
         # definitions
         objects_to_delete = []
-        vlc = bpy.context.view_layer.layer_collection
-        active_vlc = bpy.context.view_layer.active_layer_collection
-        selected_objects = bpy.context.selected_objects
-        active_object = bpy.context.active_object
+        vlc, active_vlc, active_object, selected_objects = self.status_cache()
         print(f"active object is{active_object}")
         list_of_collections = list(bpy.data.collections)  # copy not clone list
         # make export collection ready to take objects
@@ -94,20 +100,11 @@ class Main(bpy.types.Operator):
         # set path and do export
         FBXExport.export(self, path)
         # cleanup
-        for ob in objects_to_delete:
-            bpy.data.objects.remove(ob)
-        export_col.name = "Collection To Delete"
-        bpy.data.collections.remove(export_col)
-        bpy.context.view_layer.active_layer_collection = active_vlc
-        bpy.context.view_layer.objects.active = active_object
-        for ob in selected_objects:
-            ob.select_set(state=True)
+        self.cleanup(export_col, objects_to_delete)
+        self.status_reset(active_vlc, active_object, selected_objects)
 
     def call_export(self):
-        vlc = bpy.context.view_layer.layer_collection
-        active_vlc = bpy.context.view_layer.active_layer_collection
-        selected_objects = bpy.context.selected_objects
-        active_object = bpy.context.active_object
+        vlc, active_vlc, active_object, selected_objects = self.status_cache()
         # for each collection in root of scene
         for col in make_list.MakeList.list_of_collections_in_root:
             objects_to_delete = []
@@ -143,20 +140,11 @@ class Main(bpy.types.Operator):
             print(f"~~~ exporting {col.name} to {path} ~~~")
             FBXExport.export(self, path)
             # cleanup
-            export_col.name = "Collection To Delete"
-            for ob in objects_to_delete:
-                bpy.data.objects.remove(ob)
-            bpy.data.collections.remove(export_col)
-        bpy.context.view_layer.active_layer_collection = active_vlc
-        bpy.context.view_layer.objects.active = active_object
-        for ob in selected_objects:
-            ob.select_set(state=True)
+            self.cleanup(export_col, objects_to_delete)
+        self.status_reset(active_vlc, active_object, selected_objects)
 
     def call_export_objects(self):
-        vlc = bpy.context.view_layer.layer_collection
-        active_vlc = bpy.context.view_layer.active_layer_collection
-        selected_objects = bpy.context.selected_objects
-        active_object = bpy.context.active_object
+        vlc, active_vlc, active_object, selected_objects = self.status_cache()
         # for each collection in root of scene
         for col in make_list.MakeList.list_of_collections_in_root:
             objects_to_delete = []
@@ -164,7 +152,7 @@ class Main(bpy.types.Operator):
                 print(f"collection {col.name} is not valid --")
                 continue
             else:
-                print(f"collection {col.name} is valid ++") 
+                print(f"collection {col.name} is valid ++")
             # make new collection to export to & link to scene
             export_col = bpy.data.collections.new("EXPORT")
             vlc.collection.children.link(export_col)
@@ -195,10 +183,23 @@ class Main(bpy.types.Operator):
                             object.location = obj_pos
                             export_col.objects.unlink(object)
             # cleanup
-            export_col.name = "Collection To Delete"
-            for ob in objects_to_delete:
-                bpy.data.objects.remove(ob)
-            bpy.data.collections.remove(export_col)
+            self.cleanup(export_col, objects_to_delete)
+        self.status_reset(active_vlc, active_object, selected_objects)
+
+    def status_cache(self):
+        vlc = bpy.context.view_layer.layer_collection
+        active_vlc = bpy.context.view_layer.active_layer_collection
+        selected_objects = bpy.context.selected_objects
+        active_object = bpy.context.active_object
+        return vlc, active_vlc, active_object, selected_objects
+
+    def cleanup(self, export_col, objects_to_delete):
+        export_col.name = "Collection To Delete"
+        for ob in objects_to_delete:
+            bpy.data.objects.remove(ob)
+        bpy.data.collections.remove(export_col)
+
+    def status_reset(self, active_vlc, active_object, selected_objects):
         bpy.context.view_layer.active_layer_collection = active_vlc
         bpy.context.view_layer.objects.active = active_object
         for ob in selected_objects:

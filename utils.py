@@ -1,5 +1,6 @@
 import bpy
 import os
+from mathutils import Vector
 from . import merge_collection
 from . import make_list
 
@@ -89,6 +90,12 @@ class Utils(bpy.types.Operator):
         new_col = bpy.data.collections.new(new_name)
         Utils.duplicate_objects(self, col, new_col)
         return new_col
+
+    def set_origin(self, pos):
+        saved_location = bpy.context.scene.cursor.location
+        bpy.context.scene.cursor.location = pos
+        bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+        bpy.context.scene.cursor.location = saved_location
 
     def duplicate_objects(self, old_col, new_col):
         for obj in old_col.objects:

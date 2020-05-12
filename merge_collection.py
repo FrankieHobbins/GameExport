@@ -55,7 +55,7 @@ class MergeCollection(bpy.types.Operator):
         col = bpy.context.view_layer.active_layer_collection.collection
 
         if "&" in col.name:
-            name = col.name.replace("&", "") # TODO replace with global
+            name = col.name.replace("&", "")  # TODO replace with global
         else:
             name = col.name + "&"
 
