@@ -39,17 +39,13 @@ class MergeCollection(bpy.types.Operator):
             obj.select_set(True)
         bpy.ops.object.convert(target='MESH')
 
-    def merge_alone(self, col, name, target_col):
+    def merge_alone(self, col, name):
         # copy and rename
         col_copy = utils.Utils.duplicate_collection(self, col)
         col_copy.name = name
 
-        # link to target collection
-        # target_col.children.link(col_copy) do this when calling now
-
         # merge all objects into one
         MergeCollection.merge(self, col_copy)
-
         return col_copy
 
     def merge_active(self):

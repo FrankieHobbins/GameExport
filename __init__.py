@@ -39,6 +39,7 @@ classes = (
 )
 
 bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", subtype="DIR_PATH")
+bpy.types.Scene.FbxExportPrefix = bpy.props.StringProperty(name="FbxExportPrefix", subtype="DIR_PATH")
 bpy.types.Scene.FbxExportScale = bpy.props.FloatProperty(name="FbxExportScale", default=1.0)
 bpy.types.Scene.FbxExportEngine = bpy.props.EnumProperty(
         items=[

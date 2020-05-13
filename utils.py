@@ -134,6 +134,7 @@ class Utils(bpy.types.Operator):
 
     def setpath(self, col_name):
         path = bpy.context.scene.FbxExportPath
+        prefix = bpy.context.scene.FbxExportPrefix
         if path == "":
             path = os.path.dirname(bpy.data.filepath) + "\\"
         elif path[1] != ":":
@@ -142,8 +143,8 @@ class Utils(bpy.types.Operator):
 
         if bpy.context.scene.FBXExportColletionIsFolder or "\\" in col_name:
             col_name = col_name + "\\" + col_name
-
-        path += col_name + ".fbx"
+    
+        path += prefix + col_name + ".fbx"
 
         try:
             dir_name = os.path.dirname(path)

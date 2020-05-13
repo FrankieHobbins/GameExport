@@ -7,16 +7,6 @@ merge_collection = merge_collection.MergeCollection
 ut = utils.Utils
 makelist = make_list.MakeList
 
-"""
-class ExportBake
-    bl_label = "Main"
-    bl_idname = "gameexport.export"
-    bl_description = "This is where export gets called from"
-
-    def execute(self, context)
-"""
-
-
 class Main(bpy.types.Operator):
     bl_label = "Main"
     bl_idname = "gameexport.export"
@@ -25,6 +15,11 @@ class Main(bpy.types.Operator):
     bake: bpy.props.BoolProperty(
         name="bake",
         default=False
+    )
+
+    fbx_prefix: bpy.props.StringProperty(
+        name="fbx_prefix",
+        default=""
     )
 
     def execute(self, context):
@@ -41,12 +36,7 @@ class Main(bpy.types.Operator):
             print("exporting standard - special source workflow")
             path = ut.setpathspecialcases(self, "", False)
             self.call_export_single(path, [])
-
-        # for unreal static mesh workflow
-        elif bpy.context.scene.FBXExportSM:
-            print("exporting SM")
-            self.call_export_objects()
-
+        
         # standard export
         else:
             print("exporting standard")
@@ -100,109 +90,44 @@ class Main(bpy.types.Operator):
         self.cleanup(export_col, objects_to_delete)
         self.status_reset(active_vlc, active_object, selected_objects)
 
-    def call_export_objects(self):
-        vlc, active_vlc, active_object, selected_objects = self.status_cache()
-        # for each collection in root of scene
-        for col in make_list.MakeList.list_of_collections_in_root:
-            objects_to_delete = []
-            if not ut.is_valid(self, col, ""):
-                continue
-            export_col = self.create_export_col(vlc)
-            # populate export collection with objects
-            children = []
-            ut.get_all_children_collections(self, col, children)
-            children.append(col)
-            for child in children:
-                if child == export_col:
-                    continue
-                if ut.is_valid(self, child, ""):
-                    if ut.should_merge(self, child):
-                        ut.do_merge(self, child, export_col)
-                        objects_to_delete.append(bpy.context.active_object)
-                    else:
-                        for object in child.objects:
-                            obj_pos = object.location.copy()
-                            object.location = (0, 0, 0)
-                            export_col.objects.link(object)
-                            # set path and do export
-                            path = ut.setpath(self, "SM_" + object.name)
-                            print(f"~~~ exporting {object.name} to {path} ~~~")
-                            FBXExport.export(self, path)
-                            object.location = obj_pos
-                            export_col.objects.unlink(object)
-            # cleanup
-            self.cleanup(export_col, objects_to_delete)
-        self.status_reset(active_vlc, active_object, selected_objects)
-
-    def call_export(self):
-        vlc, active_vlc, active_object, selected_objects = self.status_cache()
-        # for each collection in root of scene
-        for col in make_list.MakeList.list_of_collections_in_root:
-            objects_to_delete = []
-            if not ut.is_valid(self, col, ""):
-                continue                    
-            export_col = self.create_export_col(vlc)
-            # populate export collection with objects
-            children = []
-            ut.get_all_children_collections(self, col, children)
-            children.append(col)
-            for child in children:
-                if child == export_col:
-                    continue
-                if ut.is_valid(self, child, ""):
-                    if ut.should_merge(self, child):
-                        ut.do_merge(self, child, export_col)
-                        objects_to_delete.append(bpy.context.active_object)
-                    else:
-                        for object in child.objects:
-                            export_col.objects.link(object)
-            # set path and do export
-            path = ut.setpath(self, col.name)
-            print(f"~~~ exporting {col.name} to {path} ~~~")
-            FBXExport.export(self, path)
-            # cleanup
-            self.cleanup(export_col, objects_to_delete)
-        self.status_reset(active_vlc, active_object, selected_objects)
-
     def call_export_new(self):
         # cache state to revert later
         vlc, active_vlc, active_object, selected_objects = self.status_cache()
 
         # make a list of tuples I want to export
-        export_list, export_col, objects_to_delete = self.make_export_list(vlc)
+        export_list, objects_to_delete = self.make_export_list(vlc)
 
         # go though the list and do the export
         for i in export_list:
+            export_col = self.create_export_col(vlc)
             path = ut.setpath(self, i[0])
             self.prepare_objects_for_export(i[1], export_col)
             FBXExport.export(self, path)
+            # cleanup ready for next loop
+            self.cleanup(export_col, objects_to_delete)
 
-        # cleanup & revert
-        self.cleanup(export_col, objects_to_delete)
+        # restore cached data
         self.status_reset(active_vlc, active_object, selected_objects)
 
     def make_export_list(self, vlc):
-        # standard export
         export_list = []
         objects_to_delete = []
+
         for col in make_list.MakeList.list_of_collections_in_root:
             # validate & definitions
             if not ut.is_valid(self, col, ""):
                 continue
             children_collections = []
             export_objects = []
-            export_col = self.create_export_col(vlc)
             # populate export collection with objects
             ut.get_all_children_collections(self, col, children_collections)
             children_collections.append(col)
             for child in children_collections:
                 # validate children collectins
-                if child == export_col:
-                    continue
                 if ut.is_valid(self, child, ""):
                     # if merge is needed do merge & put the single objects into list
                     if ut.should_merge(self, child):
-                        merged_object = ut.do_merge(self, child, export_col)
+                        merged_object = ut.do_merge(self, child)
                         objects_to_delete.append(bpy.context.active_object)
                         export_objects.append(merged_object.name)
                     # else put all objects into export list
@@ -210,8 +135,16 @@ class Main(bpy.types.Operator):
                         for object in child.objects:
                             export_objects.append(object.name)
             export_list.append([col.name, export_objects])
-        print(export_list)
-        return export_list, export_col, objects_to_delete
+
+        # if export as individuals is set, want to break the list up so we dont use collections and each individual object has its own list entry
+        if bpy.context.scene.FBXExportSM:
+            individual_export_list = []
+            for i in export_list:
+                for ii in i[1]:
+                    individual_export_list.append([ii, [ii]])
+            export_list = individual_export_list
+
+        return export_list, objects_to_delete
 
     def prepare_objects_for_export(self, list, export_col):
         # here we link objects from the list to the export collision
