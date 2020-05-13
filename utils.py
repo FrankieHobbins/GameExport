@@ -73,10 +73,11 @@ class Utils(bpy.types.Operator):
             return True
         return False
 
-    def do_merge(self, col, export_col):
+    def do_merge(self, col):
         # get merge name
         name = col.name.replace("&", "")  # TODO replace with global
-        merge_collection.MergeCollection.merge_alone(self, col, name, export_col)
+        object = merge_collection.MergeCollection.merge_alone(self, col, name)
+        return object
 
     def list_all_layercollections_and_collections(self, col_list, vl):
         col_list.append([vl, vl.collection])
@@ -99,7 +100,7 @@ class Utils(bpy.types.Operator):
 
     def duplicate_objects(self, old_col, new_col):
         for obj in old_col.objects:
-            if obj.type != "MESH":
+            if obj.type != "MESH": #TODO has to use emptys too so we can copy origin
                 continue
 
             merge_prefix = "_M_"
@@ -113,7 +114,7 @@ class Utils(bpy.types.Operator):
             for vertexGroup in obj.vertex_groups:
                 new_obj.vertex_groups.new(name=vertexGroup.name)
 
-            Utils.copy_modifier(self, obj, new_obj)
+            Utils.copy_modifier(self, obj, new_obj)           
 
     def copy_modifier(self, source, target):
         active_object = source
@@ -142,8 +143,7 @@ class Utils(bpy.types.Operator):
         col_name = col_name.replace("&", "")  # TODO replace with global
 
         if bpy.context.scene.FBXExportColletionIsFolder or "\\" in col_name:
-            col_name = col_name + "\\" + col_name
-    
+            col_name = col_name + "\\" + col_name    
         path += prefix + col_name + ".fbx"
 
         try:

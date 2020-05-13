@@ -39,7 +39,7 @@ classes = (
 )
 
 bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", subtype="DIR_PATH")
-bpy.types.Scene.FbxExportPrefix = bpy.props.StringProperty(name="FbxExportPrefix", subtype="DIR_PATH")
+bpy.types.Scene.FbxExportPrefix = bpy.props.StringProperty(name="FbxExportPrefix")
 bpy.types.Scene.FbxExportScale = bpy.props.FloatProperty(name="FbxExportScale", default=1.0)
 bpy.types.Scene.FbxExportEngine = bpy.props.EnumProperty(
         items=[
@@ -51,6 +51,7 @@ bpy.types.Scene.FbxExportEngine = bpy.props.EnumProperty(
         )
 bpy.types.Scene.FBXExportSelected = bpy.props.BoolProperty(name="FBXExportSelected", default=False)
 bpy.types.Scene.FBXExportSM = bpy.props.BoolProperty(name="FBXExportSM", default=False)
+bpy.types.Scene.FBXExportCentreMeshes = bpy.props.BoolProperty(name="FBXExportCentreMeshes", default=False)
 bpy.types.Scene.FBXExportColletionIsFolder = bpy.props.BoolProperty(name="FBXExportColletionIsFolder", default=False)
 
 

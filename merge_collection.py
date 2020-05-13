@@ -11,11 +11,36 @@ class MergeCollection(bpy.types.Operator):
         self.merge_active()
         return {"FINISHED"}
 
+    def merge_active(self):
+        col = bpy.context.view_layer.active_layer_collection.collection
+        if "&" in col.name:
+            name = col.name.replace("&", "")  # TODO replace with global
+        else:
+            name = col.name + "&"
+        col_copy = utils.Utils.duplicate_collection(self, col)
+        col_copy.name = name
+        vlc = bpy.context.view_layer.layer_collection
+        vlc.collection.children.link(col_copy)
+        # merge all objects into one
+        self.merge(col_copy)
+
+    def merge_alone(self, col, name):
+        # duplicate collection and rename
+        col_copy = utils.Utils.duplicate_collection(self, col)
+        col_copy.name = name
+        # link to target collection
+        col.children.link(col_copy)  # TODO make new merged collection and add there instead
+        # merge all objects into one
+        MergeCollection.merge(self, col_copy)
+        return col_copy.objects[0]
+
     def merge(self, col):
         c = {}
         c["active_object"] = bpy.context.active_object
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY']
+        for o in col.objects:
+            print(f"{col.name} has {o.name} which is {o.type}")
         # deal with empty objects that could have be instances of meshes
         if len(empty_list) > 0:
             print(f" **WARNING** Attempting to merge objects that are instanced, may not have correct result {bpy.context.selected_editable_objects}")
@@ -31,6 +56,12 @@ class MergeCollection(bpy.types.Operator):
             MergeCollection.apply_modifiers(self, col)
             bpy.ops.object.join(c)
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            for o in empty_list:
+                if "origin" in o.name.lower():
+                    org_loc = bpy.context.scene.cursor.location
+                    bpy.context.scene.cursor.location = o.location
+                    bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+                    bpy.context.scene.cursor.location = org_loc
             bpy.context.active_object.name = col.name
 
     def apply_modifiers(self, col):
@@ -39,28 +70,4 @@ class MergeCollection(bpy.types.Operator):
             obj.select_set(True)
         bpy.ops.object.convert(target='MESH')
 
-    def merge_alone(self, col, name):
-        # copy and rename
-        col_copy = utils.Utils.duplicate_collection(self, col)
-        col_copy.name = name
 
-        # merge all objects into one
-        MergeCollection.merge(self, col_copy)
-        return col_copy
-
-    def merge_active(self):
-
-        col = bpy.context.view_layer.active_layer_collection.collection
-
-        if "&" in col.name:
-            name = col.name.replace("&", "")  # TODO replace with global
-        else:
-            name = col.name + "&"
-
-        col_copy = utils.Utils.duplicate_collection(self, col)
-        col_copy.name = name
-        vlc = bpy.context.view_layer.layer_collection
-        vlc.collection.children.link(col_copy)
-
-        # merge all objects into one
-        self.merge(col_copy)
