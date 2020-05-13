@@ -45,10 +45,12 @@ class MergeCollection(bpy.types.Operator):
         col_copy.name = name
 
         # link to target collection
-        target_col.children.link(col_copy)
+        # target_col.children.link(col_copy) do this when calling now
 
         # merge all objects into one
         MergeCollection.merge(self, col_copy)
+
+        return col_copy
 
     def merge_active(self):
 

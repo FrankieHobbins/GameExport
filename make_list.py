@@ -43,7 +43,7 @@ class MakeList(bpy.types.Operator):
         # find collections that need to be merged and move to new list
         for col in list(MakeList.list_of_all_viewlayers):
             if MakeList.merge_character in col[1].name:
-                MakeList.list_of_collections_to_merge.append(col[1]) #TODO: is this actually used?
+                MakeList.list_of_collections_to_merge.append(col[1]) # TODO: is this actually used?
 
         # make list of all collections in root
         if bpy.context.scene.FBXExportSelected:
