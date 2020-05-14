@@ -37,6 +37,7 @@ class MergeCollection(bpy.types.Operator):
         empty_list = [o for o in col.objects if o.type == 'EMPTY']
         for o in col.objects:
             print(f"{col.name} has {o.name} which is {o.type}")
+        """
         # deal with empty objects that could have be instances of meshes
         if len(empty_list) > 0:
             print(f" **WARNING** Attempting to merge objects that are instanced, may not have correct result {bpy.context.selected_editable_objects}")
@@ -44,6 +45,7 @@ class MergeCollection(bpy.types.Operator):
             c["selected_editable_objects"] = empty_list
             bpy.ops.object.duplicates_make_real()
             obj_list += bpy.context.selected_editable_objects
+        """
         # select objects and join
         if len(obj_list) > 0:
             bpy.context.view_layer.objects.active = obj_list[0]

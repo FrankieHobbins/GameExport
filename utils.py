@@ -101,22 +101,19 @@ class Utils(bpy.types.Operator):
         bpy.context.scene.cursor.location = saved_location
 
     def duplicate_objects(self, old_col, new_col):
+        merge_prefix = "_M_"  #TODO make global
         for obj in old_col.objects:
-            if obj.type != "MESH": #TODO has to use emptys too so we can copy origin
-                continue
-
-            merge_prefix = "_M_"
-            obj_data = obj.data.copy()
-            new_obj = bpy.data.objects.new(merge_prefix + obj.name, obj_data)
-            new_col.objects.link(new_obj)
-
-            new_obj.matrix_world = obj.matrix_world
-            new_obj.rotation_euler = obj.rotation_euler
-
-            for vertexGroup in obj.vertex_groups:
-                new_obj.vertex_groups.new(name=vertexGroup.name)
-
-            Utils.copy_modifier(self, obj, new_obj)           
+            if obj.type == "MESH":
+                obj_data = obj.data.copy()
+                new_obj = bpy.data.objects.new(merge_prefix + obj.name, obj_data)
+                new_col.objects.link(new_obj)
+                new_obj.matrix_world = obj.matrix_world
+                new_obj.rotation_euler = obj.rotation_euler
+                for vertexGroup in obj.vertex_groups:
+                    new_obj.vertex_groups.new(name=vertexGroup.name)
+                Utils.copy_modifier(self, obj, new_obj)
+            if obj.type == "EMPTY" and obj.name.lower() == "origin":
+                new_col.objects.link(obj)
 
     def copy_modifier(self, source, target):
         active_object = source
