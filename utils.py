@@ -73,11 +73,13 @@ class Utils(bpy.types.Operator):
             return True
         return False
 
+    """
     def do_merge(self, col):
         # get merge name
         name = col.name.replace("&", "")  # TODO replace with global
-        object = merge_collection.MergeCollection.merge_alone(self, col, name)
+        object = merge_collection.MergeCollection.merge_specified(self, col, name)
         return object
+    """
 
     def list_all_layercollections_and_collections(self, col_list, vl):
         col_list.append([vl, vl.collection])

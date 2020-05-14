@@ -13,10 +13,7 @@ class MergeCollection(bpy.types.Operator):
 
     def merge_active(self):
         col = bpy.context.view_layer.active_layer_collection.collection
-        if "&" in col.name:
-            name = col.name.replace("&", "")  # TODO replace with global
-        else:
-            name = col.name + "&"
+        name = MergeCollection.rename_merge_collection(self, col.name)
         col_copy = utils.Utils.duplicate_collection(self, col)
         col_copy.name = name
         vlc = bpy.context.view_layer.layer_collection
@@ -24,12 +21,11 @@ class MergeCollection(bpy.types.Operator):
         # merge all objects into one
         self.merge(col_copy)
 
-    def merge_alone(self, col, name):
+    def merge_specified(self, col):
         # duplicate collection and rename
         col_copy = utils.Utils.duplicate_collection(self, col)
-        col_copy.name = name
-        # link to target collection
-        col.children.link(col_copy)  # TODO make new merged collection and add there instead
+        col_copy.name = MergeCollection.rename_merge_collection(self, col.name)
+        bpy.context.view_layer.layer_collection.collection.children.link(col_copy)
         # merge all objects into one
         MergeCollection.merge(self, col_copy)
         return col_copy.objects[0]
@@ -70,4 +66,7 @@ class MergeCollection(bpy.types.Operator):
             obj.select_set(True)
         bpy.ops.object.convert(target='MESH')
 
-
+    def rename_merge_collection(self, name):
+        if "&" in name:
+            name = name.replace("&", "")  # TODO replace with global
+        return name

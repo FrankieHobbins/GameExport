@@ -85,16 +85,14 @@ class Main(bpy.types.Operator):
                 if ut.is_valid(self, child, ""):
                     # if merge is needed do merge & put the new objects into the list
                     if ut.should_merge(self, child):
-                        merged_object = ut.do_merge(self, child)
-                        merged_object.name = child.name
-                        objects_to_delete.append(bpy.context.active_object.name)
+                        merged_object = merge_collection.merge_specified(self, child)                        
+                        objects_to_delete.append(merged_object.name)
                         export_objects.append(merged_object.name)
                     # else put all objects into export list
                     else:
                         for object in child.objects:
                             export_objects.append(object.name)
             export_list.append([col.name, export_objects])
-
         # if export as individuals is set, want to break the list up so we dont use collections and each individual object has its own list entry
         if bpy.context.scene.FBXExportSM:
             individual_export_list = []
@@ -102,7 +100,6 @@ class Main(bpy.types.Operator):
                 for ii in i[1]:
                     individual_export_list.append([ii, [ii]])
             export_list = individual_export_list
-
         return export_list, objects_to_delete
 
     def prepare_objects_for_export(self, list, export_col):
@@ -131,8 +128,9 @@ class Main(bpy.types.Operator):
     def cleanup(self, export_col, objects_to_delete):
         export_col.name = "Collection To Delete"
         for ob in objects_to_delete:
-            print(f"THIS IS WHATS CAUSING A PROBLEM {ob}")
+            print(ob)
             bpy.data.objects.remove(bpy.data.objects[ob])
+            bpy.data.collections.remove(bpy.data.collections[ob])
         bpy.data.collections.remove(export_col)
 
     def status_reset(self, active_vlc, active_object, selected_objects):
@@ -172,7 +170,7 @@ class Main(bpy.types.Operator):
             # add objects to export collection & merge if needed
             if ut.should_merge(self, col):
                 print(f"collection {col.name} is getting merged")
-                ut.do_merge(self, col, export_col)
+                #ut.do_merge(self, col, export_col)
                 objects_to_delete.append(bpy.context.active_object.name)
             else:
                 for child in col.objects:
