@@ -73,14 +73,6 @@ class Utils(bpy.types.Operator):
             return True
         return False
 
-    """
-    def do_merge(self, col):
-        # get merge name
-        name = col.name.replace("&", "")  # TODO replace with global
-        object = merge_collection.MergeCollection.merge_specified(self, col, name)
-        return object
-    """
-
     def list_all_layercollections_and_collections(self, col_list, vl):
         col_list.append([vl, vl.collection])
         for child in vl.children:
@@ -101,7 +93,7 @@ class Utils(bpy.types.Operator):
         bpy.context.scene.cursor.location = saved_location
 
     def duplicate_objects(self, old_col, new_col):
-        merge_prefix = "_M_"  #TODO make global
+        merge_prefix = "_M_"  # TODO make global
         for obj in old_col.objects:
             if obj.type == "MESH":
                 obj_data = obj.data.copy()

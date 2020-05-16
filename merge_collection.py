@@ -37,6 +37,7 @@ class MergeCollection(bpy.types.Operator):
         empty_list = [o for o in col.objects if o.type == 'EMPTY']
         for o in col.objects:
             print(f"{col.name} has {o.name} which is {o.type}")
+        
         """
         # deal with empty objects that could have be instances of meshes
         if len(empty_list) > 0:
