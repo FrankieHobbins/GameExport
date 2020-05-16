@@ -64,8 +64,9 @@ class Main(bpy.types.Operator):
                     ii[0].location = ii[1]
             else:
                 FBXExport.export(self, path)
-            self.cleanup(export_col, objects_to_delete)
+            self.cleanup(export_col)
         # restore cached data
+        self.cleanup_merged(objects_to_delete)
         self.status_reset(active_vlc, active_object, selected_objects)
 
     def make_export_list(self, vlc):
@@ -125,13 +126,15 @@ class Main(bpy.types.Operator):
         active_object = bpy.context.active_object
         return vlc, active_vlc, active_object, selected_objects
 
-    def cleanup(self, export_col, objects_to_delete):
+    def cleanup(self, export_col):
         export_col.name = "Collection To Delete"
+        bpy.data.collections.remove(export_col)
+
+    def cleanup_merged(self, objects_to_delete):
         for ob in objects_to_delete:
             print(ob)
             bpy.data.objects.remove(bpy.data.objects[ob])
             bpy.data.collections.remove(bpy.data.collections[ob])
-        bpy.data.collections.remove(export_col)
 
     def status_reset(self, active_vlc, active_object, selected_objects):
         bpy.context.view_layer.active_layer_collection = active_vlc
