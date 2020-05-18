@@ -32,6 +32,7 @@ class MergeCollection(bpy.types.Operator):
 
     def merge(self, col):
         c = {}
+        print(col.objects)
         c["active_object"] = bpy.context.active_object
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY']

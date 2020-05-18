@@ -104,7 +104,7 @@ class Utils(bpy.types.Operator):
                 for vertexGroup in obj.vertex_groups:
                     new_obj.vertex_groups.new(name=vertexGroup.name)
                 Utils.copy_modifier(self, obj, new_obj)
-            if obj.type == "EMPTY" and obj.name.lower() == "origin":
+            if obj.type == "EMPTY": #  and "origin" in obj.name.lower():
                 new_col.objects.link(obj)
 
     def copy_modifier(self, source, target):
