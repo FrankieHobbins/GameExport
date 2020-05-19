@@ -13,9 +13,15 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row = layout.row()
         props = layout.operator("gameexport.export", text="Export")
         props.bake = False
+        props.selected = False
+        row = layout.row()
+        props = layout.operator("gameexport.export", text="Selected")
+        props.bake = False
+        props.selected = True
         row = layout.row()
         props = layout.operator("gameexport.export", text="Bake")
         props.bake = True
+        props.selected = False
         row = layout.row()
         row.prop(context.scene, "FbxExportPath", text="path")
         row = layout.row()

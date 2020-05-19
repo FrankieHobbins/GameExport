@@ -17,6 +17,11 @@ class Main(bpy.types.Operator):
         default=False
     )
 
+    selected: bpy.props.BoolProperty(
+        name="selected",
+        default=False
+    )
+
     fbx_prefix: bpy.props.StringProperty(
         name="fbx_prefix",
         default=""
@@ -25,6 +30,7 @@ class Main(bpy.types.Operator):
     def execute(self, context):
         make_list.MakeList.reset(self)
         make_list.MakeList.make_list(self)
+        print(self.selected)
         # for baking
         if self.bake:
             print("exporting bake")
@@ -76,7 +82,8 @@ class Main(bpy.types.Operator):
         objects_to_delete = []
         for col in make_list.MakeList.list_of_collections_in_root:
             # validate & definitions
-            if not ut.is_valid(self, col, bake):
+            # if not ut.is_valid(self, col, bake, bpy.context.selected_objects, self.selected):
+            if not ut.is_valid(self, col, bake, [], False):
                 continue
             children_collections = []
             export_objects = []
@@ -85,12 +92,13 @@ class Main(bpy.types.Operator):
             children_collections.append(col)
             for child in children_collections:
                 # validate children collectins
-                if ut.is_valid(self, child, ""):
+                if ut.is_valid(self, child, bake, bpy.context.selected_objects, self.selected):
                     # if merge is needed do merge & put the new objects into the list
                     if ut.should_merge(self, child):
-                        merged_object = merge_collection.merge_specified(self, child)                        
+                        merged_object = merge_collection.merge_specified(self, child)
                         objects_to_delete.append(merged_object.name)
                         export_objects.append(merged_object.name)
+                        merged_object.select_set(True)
                     # else put all objects into export list
                     else:
                         for object in child.objects:
@@ -103,6 +111,14 @@ class Main(bpy.types.Operator):
                 for ii in i[1]:
                     individual_export_list.append([ii, [ii]])
             export_list = individual_export_list
+        # if export selected is used, remove all objects that arn't selected
+        if self.selected:
+            selected_export_list = []
+            for i in export_list:
+                for ii in i[1]:
+                    if bpy.data.objects[ii] in bpy.context.selected_objects:
+                        selected_export_list.append([ii, [ii]])
+            export_list = selected_export_list
         return export_list, objects_to_delete
 
     def prepare_objects_for_export(self, list, export_col):

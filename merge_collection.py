@@ -32,13 +32,19 @@ class MergeCollection(bpy.types.Operator):
 
     def merge(self, col):
         c = {}
-        print(col.objects)
+        origin = False
+        origin_loc = bpy.context.scene.cursor.location
+
         c["active_object"] = bpy.context.active_object
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY']
+
         for o in col.objects:
-            print(f"{col.name} has {o.name} which is {o.type}")
-        
+            if "origin" in o.name.lower():
+                origin = True
+                origin_loc = o.location
+                continue
+    
         """
         # deal with empty objects that could have be instances of meshes
         if len(empty_list) > 0:
@@ -56,12 +62,11 @@ class MergeCollection(bpy.types.Operator):
             MergeCollection.apply_modifiers(self, col)
             bpy.ops.object.join(c)
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-            for o in empty_list:
-                if "origin" in o.name.lower():
-                    org_loc = bpy.context.scene.cursor.location
-                    bpy.context.scene.cursor.location = o.location
-                    bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-                    bpy.context.scene.cursor.location = org_loc
+            if origin > 0:
+                org_loc = bpy.context.scene.cursor.location
+                bpy.context.scene.cursor.location = origin_loc
+                bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+                bpy.context.scene.cursor.location = org_loc
             bpy.context.active_object.name = col.name
 
     def apply_modifiers(self, col):

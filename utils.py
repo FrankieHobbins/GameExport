@@ -41,10 +41,9 @@ class Utils(bpy.types.Operator):
         else:
             return col_list
 
-    def is_valid(self, col, bake):
+    def is_valid(self, col, bake, objects, selected):
         low = ["low_", "lo_", "_low", "_lo"]
         high = ["high_", "hi_", "_high", "_hi"]
-        found = False
         if bake == "low":
             if not any(col.name.lower().find(el) != -1 for el in low):
                 return False
@@ -64,6 +63,8 @@ class Utils(bpy.types.Operator):
         if len(vlc_list) > 0:
             if vlc_list[0].exclude:
                 return False
+        if selected and len([i for i in objects if i.name in col.objects]) == 0:
+            return False
         return True
 
     def should_merge(self, col):
