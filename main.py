@@ -150,7 +150,6 @@ class Main(bpy.types.Operator):
 
     def cleanup_merged(self, objects_to_delete):
         for ob in objects_to_delete:
-            print(ob)
             bpy.data.objects.remove(bpy.data.objects[ob])
             bpy.data.collections.remove(bpy.data.collections[ob])
 

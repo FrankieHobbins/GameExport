@@ -32,19 +32,12 @@ class MergeCollection(bpy.types.Operator):
 
     def merge(self, col):
         c = {}
-        origin = False
-        origin_loc = bpy.context.scene.cursor.location
+        origin_object = False
 
         c["active_object"] = bpy.context.active_object
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY']
 
-        for o in col.objects:
-            if "origin" in o.name.lower():
-                origin = True
-                origin_loc = o.location
-                continue
-    
         """
         # deal with empty objects that could have be instances of meshes
         if len(empty_list) > 0:
@@ -54,6 +47,10 @@ class MergeCollection(bpy.types.Operator):
             bpy.ops.object.duplicates_make_real()
             obj_list += bpy.context.selected_editable_objects
         """
+
+        for o in col.objects:
+            if "origin" in o.name.lower():
+                origin_object = o.location.copy()
         # select objects and join
         if len(obj_list) > 0:
             bpy.context.view_layer.objects.active = obj_list[0]
@@ -62,12 +59,13 @@ class MergeCollection(bpy.types.Operator):
             MergeCollection.apply_modifiers(self, col)
             bpy.ops.object.join(c)
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-            if origin > 0:
+            bpy.context.active_object.name = col.name
+            if origin_object:
+                print(origin_object)
                 org_loc = bpy.context.scene.cursor.location
-                bpy.context.scene.cursor.location = origin_loc
+                bpy.context.scene.cursor.location = origin_object
                 bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
                 bpy.context.scene.cursor.location = org_loc
-            bpy.context.active_object.name = col.name
 
     def apply_modifiers(self, col):
         bpy.ops.object.select_all(action='DESELECT')
