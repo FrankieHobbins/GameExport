@@ -64,14 +64,14 @@ class Main(bpy.types.Operator):
                 obj_and_pos_list = []
                 for ii in i[1]:
                     o = bpy.data.objects[ii]
-                    o_pos = o.location.copy()
+                    o_pos = o.location.copy()                    
                     obj_and_pos_list.append([o, o_pos])
                     o.location = (0, 0, 0)
-                FBXExport.export(self, path)
+                FBXExport.export(self, path, export_col)
                 for ii in obj_and_pos_list:
                     ii[0].location = ii[1]
-            else:
-                FBXExport.export(self, path)
+            else:                
+                FBXExport.export(self, path, export_col)
             self.cleanup(export_col)
         # restore cached data
         self.cleanup_merged(objects_to_delete)
@@ -92,7 +92,7 @@ class Main(bpy.types.Operator):
             children_collections.append(col)
             for child in children_collections:
                 # validate children collectins
-                if ut.is_valid(self, child, bake, bpy.context.selected_objects, self.selected):
+                if ut.is_valid(self, child, False, bpy.context.selected_objects, self.selected):
                     # if merge is needed do merge & put the new objects into the list
                     if ut.should_merge(self, child):
                         merged_object = merge_collection.merge_specified(self, child)
@@ -145,10 +145,14 @@ class Main(bpy.types.Operator):
         return vlc, active_vlc, active_object, selected_objects
 
     def cleanup(self, export_col):
+        if bpy.context.scene.FBXLeaveExport:
+            return
         export_col.name = "Collection To Delete"
         bpy.data.collections.remove(export_col)
 
     def cleanup_merged(self, objects_to_delete):
+        if bpy.context.scene.FBXLeaveExport:
+            return
         for ob in objects_to_delete:
             bpy.data.objects.remove(bpy.data.objects[ob])
             bpy.data.collections.remove(bpy.data.collections[ob])
@@ -159,23 +163,43 @@ class Main(bpy.types.Operator):
         for ob in selected_objects:
             ob.select_set(state=True)
 
+
 class FBXExport(bpy.types.Operator):
     bl_label = "Export FBX"
     bl_idname = "gameexport.fbxexport"
     bl_description = "This is where export gets called from"
 
-    def export(self, path):
+    def export(self, path, export_col):
         if (bpy.context.scene.FbxExportEngine == 'default'):  # TODO make work good
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity())
-
         elif (bpy.context.scene.FbxExportEngine == 'unity'):
+            FBXExport.unity_export_rotation(export_col, set="True")
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity())
-
+            FBXExport.unity_export_rotation(export_col, set="False")
         elif (bpy.context.scene.FbxExportEngine == 'unreal'):
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unreal())
 
+    def unity_export_rotation(export_col, set):
+        if set:
+            for i in export_col.objects:
+                if i.type == 'MESH':
+                    bpy.ops.object.select_all(action='DESELECT')
+                    bpy.context.view_layer.objects.active = i
+                    i.select_set(True)
+                    i.rotation_euler[0] -= 1.5708  # 90 deg in radians
+                    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+                    i.rotation_euler[0] += 1.5708  # 90 deg in radians
+        else:
+            for i in export_col.objects:
+                if i.type == 'MESH':
+                    bpy.ops.object.select_all(action='DESELECT')
+                    bpy.context.view_layer.objects.active = i
+                    i.select_set(True)
+                    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+                    i.select_set(False)
+    
     def export_fbx_settings_unity():
-        return {
+        return {    
             "use_selection": False,
             "use_active_collection": True,
             "global_scale": bpy.context.scene.FbxExportScale,
@@ -183,7 +207,7 @@ class FBXExport(bpy.types.Operator):
             # "apply_scale_options": 'FBX_SCALE_NONE',
             "apply_scale_options": 'FBX_SCALE_ALL',
             "bake_space_transform": False,
-            "object_types": {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'},
+            "object_types": {'OTHER', 'MESH', 'ARMATURE'},
             "use_mesh_modifiers": True,
             "use_mesh_modifiers_render": True,
             "mesh_smooth_type": 'OFF',

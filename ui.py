@@ -31,7 +31,7 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FbxExportEngine", text="engine")
         row = layout.row()
-        row.prop(context.scene, "FBXExportSelected", text="Export Selected")
+        row.prop(context.scene, "FBXLeaveExport", text="Leave Objects")
         row = layout.row()
         row.prop(context.scene, "FBXExportSM", text="Individual Objets")
         row = layout.row()
