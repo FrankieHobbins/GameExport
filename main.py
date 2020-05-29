@@ -201,15 +201,18 @@ class FBXExport(bpy.types.Operator):
                     return
     
     def export_fbx_settings_unity():
-        return {    
+        object_types = {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'}
+        if self.bake:
+            object_types = {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'}
+        return {
             "use_selection": False,
             "use_active_collection": True,
             "global_scale": bpy.context.scene.FbxExportScale,
             "apply_unit_scale": True,
             # "apply_scale_options": 'FBX_SCALE_NONE',
             "apply_scale_options": 'FBX_SCALE_ALL',
-            "bake_space_transform": False,
-            "object_types": {'OTHER', 'MESH', 'ARMATURE'},
+            "bake_space_transform": False,            
+            "object_types": object_types,
             "use_mesh_modifiers": True,
             "use_mesh_modifiers_render": True,
             "mesh_smooth_type": 'OFF',
