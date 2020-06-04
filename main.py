@@ -171,10 +171,10 @@ class FBXExport(bpy.types.Operator):
 
     def export(self, path, export_col):
         if (bpy.context.scene.FbxExportEngine == 'default'):  # TODO make work good
-            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity())
+            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity(self))
         elif (bpy.context.scene.FbxExportEngine == 'unity'):
             FBXExport.unity_export_rotation(export_col, set=True)
-            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity())
+            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity(self))
             FBXExport.unity_export_rotation(export_col, set=False)
         elif (bpy.context.scene.FbxExportEngine == 'unreal'):
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unreal())
@@ -199,9 +199,9 @@ class FBXExport(bpy.types.Operator):
                     bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
                     i.select_set(False)
                     return
-    
-    def export_fbx_settings_unity():
-        object_types = {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'}
+
+    def export_fbx_settings_unity(self):
+        object_types = {'OTHER', 'MESH', 'ARMATURE'}
         if self.bake:
             object_types = {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'}
         return {
@@ -211,7 +211,7 @@ class FBXExport(bpy.types.Operator):
             "apply_unit_scale": True,
             # "apply_scale_options": 'FBX_SCALE_NONE',
             "apply_scale_options": 'FBX_SCALE_ALL',
-            "bake_space_transform": False,            
+            "bake_space_transform": False,
             "object_types": object_types,
             "use_mesh_modifiers": True,
             "use_mesh_modifiers_render": True,
