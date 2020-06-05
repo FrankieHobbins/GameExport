@@ -54,7 +54,7 @@ bpy.types.Scene.FBXExportSM = bpy.props.BoolProperty(name="FBXExportSM", default
 bpy.types.Scene.FBXExportCentreMeshes = bpy.props.BoolProperty(name="FBXExportCentreMeshes", default=False)
 bpy.types.Scene.FBXExportColletionIsFolder = bpy.props.BoolProperty(name="FBXExportColletionIsFolder", default=False)
 bpy.types.Scene.FBXLeaveExport = bpy.props.BoolProperty(name="FBXLeaveExport", default=False)
-
+bpy.types.Scene.FBXFixUnityRotation = bpy.props.BoolProperty(name="FBXFixUnityRotation", default=False)
 
 def register():
     from bpy.utils import register_class

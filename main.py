@@ -173,32 +173,33 @@ class FBXExport(bpy.types.Operator):
         if (bpy.context.scene.FbxExportEngine == 'default'):  # TODO make work good
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity(self))
         elif (bpy.context.scene.FbxExportEngine == 'unity'):
-            FBXExport.unity_export_rotation(export_col, set=True)
+            FBXExport.unity_export_rotation(export_col, set=True, do=bpy.context.scene.FBXFixUnityRotation)
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity(self))
-            FBXExport.unity_export_rotation(export_col, set=False)
+            FBXExport.unity_export_rotation(export_col, set=False, do=bpy.context.scene.FBXFixUnityRotation)
         elif (bpy.context.scene.FbxExportEngine == 'unreal'):
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unreal())
 
-    def unity_export_rotation(export_col, set):
-        if set:
-            for i in export_col.objects:
-                if i.type == 'MESH':
-                    bpy.ops.object.select_all(action='DESELECT')
-                    # bpy.context.view_layer.objects.active = i
-                    i.select_set(True)
-                    i.rotation_euler[0] -= 1.5708  # 90 deg in radians
-                    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-                    i.rotation_euler[0] += 1.5708  # 90 deg in radians
-                    return
-        elif not set:
-            for i in export_col.objects:
-                if i.type == 'MESH':
-                    bpy.ops.object.select_all(action='DESELECT')
-                    # bpy.context.view_layer.objects.active = i
-                    i.select_set(True)
-                    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-                    i.select_set(False)
-                    return
+    def unity_export_rotation(export_col, set, do):
+        if do:
+            if set:
+                for i in export_col.objects:
+                    if i.type == 'MESH':
+                        bpy.ops.object.select_all(action='DESELECT')
+                        # bpy.context.view_layer.objects.active = i
+                        i.select_set(True)
+                        i.rotation_euler[0] -= 1.5708  # 90 deg in radians
+                        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+                        i.rotation_euler[0] += 1.5708  # 90 deg in radians
+                        return
+            elif not set:
+                for i in export_col.objects:
+                    if i.type == 'MESH':
+                        bpy.ops.object.select_all(action='DESELECT')
+                        # bpy.context.view_layer.objects.active = i
+                        i.select_set(True)
+                        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+                        i.select_set(False)
+                        return
 
     def export_fbx_settings_unity(self):
         object_types = {'OTHER', 'MESH', 'ARMATURE'}
