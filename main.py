@@ -41,7 +41,7 @@ class Main(bpy.types.Operator):
         elif bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
             print("exporting standard - special source workflow")
             path = ut.setpathspecialcases(self, "", False)
-            self.call_export_single(path, [])
+            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_entire_scene())
         # standard export
         else:
             print("exporting standard")
