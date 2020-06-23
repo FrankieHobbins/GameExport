@@ -35,17 +35,12 @@ class Main(bpy.types.Operator):
         if self.bake:
             print("exporting bake")
             path = ut.setpath(self, bpy.path.basename(bpy.context.blend_data.filepath.replace(".blend", "")))
-            self.call_export_new("high")
-            self.call_export_new("low")
+            self.call_export_new(bake="high")
+            self.call_export_new(bake="low")
         # for special up workflow
-        elif bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
-            print("exporting standard - special source workflow")
-            path = ut.setpathspecialcases(self, "", False)
-            self.call_export_single(path, [])
-        # standard export
         else:
             print("exporting standard")
-            self.call_export_new("")
+            self.call_export_new(bake="")
         make_list.MakeList.clean_up(self)
         return {"FINISHED"}
 
@@ -64,13 +59,13 @@ class Main(bpy.types.Operator):
                 obj_and_pos_list = []
                 for ii in i[1]:
                     o = bpy.data.objects[ii]
-                    o_pos = o.location.copy()                    
+                    o_pos = o.location.copy()
                     obj_and_pos_list.append([o, o_pos])
                     o.location = (0, 0, 0)
                 FBXExport.export(self, path, export_col)
                 for ii in obj_and_pos_list:
                     ii[0].location = ii[1]
-            else:                
+            else:
                 FBXExport.export(self, path, export_col)
             self.cleanup(export_col)
         # restore cached data
