@@ -126,11 +126,6 @@ class Utils(bpy.types.Operator):
                 setattr(m_dst, prop, getattr(m_src, prop))
 
     def setpath(self, col_name):
-        if bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
-            path = Utils.setpathspecialcases(self)
-            print("exporting standard - special source workflow")
-            return path
-
         path = bpy.context.scene.FbxExportPath
         prefix = bpy.context.scene.FbxExportPrefix
         if path == "":
@@ -140,7 +135,7 @@ class Utils(bpy.types.Operator):
         col_name = col_name.replace("&", "")  # TODO replace with global
 
         if bpy.context.scene.FBXExportColletionIsFolder or "\\" in col_name:
-            col_name = col_name + "\\" + col_name
+            col_name = col_name + "\\" + col_name    
         path += prefix + col_name + ".fbx"
 
         try:
@@ -151,13 +146,14 @@ class Utils(bpy.types.Operator):
 
         return path
 
-    def setpathspecialcases(self):
+    def setpathspecialcases(self, path, bake):
         path = os.path.dirname(bpy.data.filepath) + "\\" + bpy.path.basename(bpy.context.blend_data.filepath)
-        if "Source~" in path:
-            path = path.replace("Source~", "")
-        if "Art_Source" in path:
-            # TODO put these in user prefs
-            path = path.replace("Art_Source", "UP_Client")
+        if not bake:
+            if "Source~" in path:
+                path = path.replace("Source~", "")
+            if "Art_Source" in path:
+                # TODO put these in user prefs
+                path = path.replace("Art_Source", "UP_Client")
         if ".blend" in path:
             path = path.replace(".blend", ".fbx")
         if ".Blend" in path:
