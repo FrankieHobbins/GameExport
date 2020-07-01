@@ -35,7 +35,8 @@ classes = (
     merge_collection.MergeCollection,
     ui.PANEL_PT_gameexport,
     ui.OpenFolder,
-    ui.PANEL_PT_gameexport_addon_prefs
+    ui.PANEL_PT_gameexport_addon_prefs,
+    ui.FActionList
 )
 
 bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", subtype="DIR_PATH")
@@ -55,6 +56,9 @@ bpy.types.Scene.FBXExportCentreMeshes = bpy.props.BoolProperty(name="FBXExportCe
 bpy.types.Scene.FBXExportColletionIsFolder = bpy.props.BoolProperty(name="FBXExportColletionIsFolder", default=False)
 bpy.types.Scene.FBXLeaveExport = bpy.props.BoolProperty(name="FBXLeaveExport", default=False)
 bpy.types.Scene.FBXFixUnityRotation = bpy.props.BoolProperty(name="FBXFixUnityRotation", default=False)
+bpy.types.Object.action_list_index = bpy.props.IntProperty()
+bpy.types.Action.Export = bpy.props.BoolProperty(name="Export")
+bpy.types.Scene.LastAnimSelected = bpy.props.StringProperty(name="Last Anim Selected")
 
 def register():
     from bpy.utils import register_class

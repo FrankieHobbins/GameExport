@@ -1,13 +1,20 @@
 import bpy
 
 
+class FActionList(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+        if bpy.context.active_object is not None:
+            row = layout.row(align=False)
+            row.prop(item,"name", text="", emboss=False)
+            row.prop(item,"Export", text="")
+
+
 class PANEL_PT_gameexport(bpy.types.Panel):
     # bl_idname = "gameexport.ui_panel"
     bl_label = "Export FBX"
     bl_category = "GameExport"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-
     def draw(self, context):
         layout = self.layout
         row = layout.row()
@@ -40,6 +47,16 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row.prop(context.scene, "FBXExportCentreMeshes", text="Centred")
         row = layout.row()
         row.prop(context.scene, "FBXExportColletionIsFolder", text="Collection is Folder")
+
+        layout.template_list("FActionList", "", bpy.data, "actions", context.object, "action_list_index", rows=2)
+        if bpy.types.Scene.LastAnimSelected != bpy.data.actions[bpy.context.object.action_list_index]:
+            bpy.context.object.animation_data.action = bpy.data.actions[bpy.context.object.action_list_index]
+            currentaction = bpy.context.object.animation_data.action
+            keys = currentaction.frame_range
+            lastkey = (keys[-1])
+            bpy.context.scene.frame_end = lastkey
+        bpy.types.Scene.LastAnimSelected = bpy.data.actions[bpy.context.object.action_list_index]  # lets you selected with the action dropdown from action editor        
+
         # row.operator('gameexport.openfolder', text='Path')
 
 
