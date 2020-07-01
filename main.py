@@ -41,7 +41,7 @@ class Main(bpy.types.Operator):
         elif bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
             print("exporting standard - special source workflow")
             path = ut.setpathspecialcases(self, "", False)
-            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_entire_scene())
+            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_entire_scene(self))
         # standard export
         else:
             print("exporting standard")
@@ -70,7 +70,7 @@ class Main(bpy.types.Operator):
                 FBXExport.export(self, path, export_col)
                 for ii in obj_and_pos_list:
                     ii[0].location = ii[1]
-            else:                
+            else:
                 FBXExport.export(self, path, export_col)
             self.cleanup(export_col)
         # restore cached data
@@ -278,9 +278,15 @@ class FBXExport(bpy.types.Operator):
         }
 
     def export_entire_scene(self, path):
-        bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_entire_scene())
+        bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_entire_scene(self))
 
-    def export_fbx_settings_entire_scene():
+    def export_fbx_settings_entire_scene(self):
+        bake_anim_use_nla_strips = False
+        bake_anim_use_all_actions = True
+        if bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
+            bake_anim_use_nla_strips = True
+            bake_anim_use_all_actions = False
+            ut.actionstoNLA(self, "_STA_")
         return {
             "use_selection": False,
             "use_active_collection": False,
@@ -304,8 +310,8 @@ class FBXExport(bpy.types.Operator):
             "armature_nodetype": 'NULL',
             "bake_anim": True,
             "bake_anim_use_all_bones": True,
-            "bake_anim_use_nla_strips": False,
-            "bake_anim_use_all_actions": True,
+            "bake_anim_use_nla_strips": bake_anim_use_nla_strips,
+            "bake_anim_use_all_actions": bake_anim_use_all_actions,
             "bake_anim_force_startend_keying": True,
             "bake_anim_step": 1.0,
             "bake_anim_simplify_factor": 1.0,
