@@ -49,13 +49,14 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row.prop(context.scene, "FBXExportColletionIsFolder", text="Collection is Folder")
 
         layout.template_list("FActionList", "", bpy.data, "actions", context.object, "action_list_index", rows=2)
-        if bpy.types.Scene.LastAnimSelected != bpy.data.actions[bpy.context.object.action_list_index]:
-            bpy.context.object.animation_data.action = bpy.data.actions[bpy.context.object.action_list_index]
-            currentaction = bpy.context.object.animation_data.action
-            keys = currentaction.frame_range
-            lastkey = (keys[-1])
-            bpy.context.scene.frame_end = lastkey
-        bpy.types.Scene.LastAnimSelected = bpy.data.actions[bpy.context.object.action_list_index]  # lets you selected with the action dropdown from action editor        
+        if len(bpy.data.actions) > 0:
+            if bpy.types.Scene.LastAnimSelected != bpy.data.actions[bpy.context.object.action_list_index]:
+                bpy.context.object.animation_data.action = bpy.data.actions[bpy.context.object.action_list_index]
+                currentaction = bpy.context.object.animation_data.action
+                keys = currentaction.frame_range
+                lastkey = (keys[-1])
+                bpy.context.scene.frame_end = lastkey
+            bpy.types.Scene.LastAnimSelected = bpy.data.actions[bpy.context.object.action_list_index]  # lets you selected with the action dropdown from action editor        
 
         # row.operator('gameexport.openfolder', text='Path')
 
