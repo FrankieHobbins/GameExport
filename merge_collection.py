@@ -33,7 +33,6 @@ class MergeCollection(bpy.types.Operator):
     def merge(self, col):
         c = {}
         origin_object = False
-
         c["active_object"] = bpy.context.active_object
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY']
@@ -51,6 +50,7 @@ class MergeCollection(bpy.types.Operator):
         for o in col.objects:
             if "origin" in o.name.lower():
                 origin_object = o.location.copy()
+            print(col.name + "||" + o.name)
         # select objects and join
         if len(obj_list) > 0:
             bpy.context.view_layer.objects.active = obj_list[0]
@@ -59,7 +59,13 @@ class MergeCollection(bpy.types.Operator):
             MergeCollection.apply_modifiers(self, col)
             bpy.ops.object.join(c)
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-            bpy.context.active_object.name = col.name
+            # fix to stop conflicts with new merged objects against old objects
+            new_name = col.name.replace("__MERGED_", "")
+            for o in bpy.data.objects:
+                if o.name == new_name:
+                    o.name += "_CONFLICT__"
+            bpy.context.active_object.name = new_name
+
             if origin_object:
                 print(origin_object)
                 org_loc = bpy.context.scene.cursor.location
@@ -76,4 +82,5 @@ class MergeCollection(bpy.types.Operator):
     def rename_merge_collection(self, name):
         if "&" in name:
             name = name.replace("&", "")  # TODO replace with global
+            name += "__MERGED_"
         return name

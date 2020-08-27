@@ -7,6 +7,7 @@ merge_collection = merge_collection.MergeCollection
 ut = utils.Utils
 makelist = make_list.MakeList
 
+
 class Main(bpy.types.Operator):
     bl_label = "Main"
     bl_idname = "gameexport.export"
@@ -55,7 +56,7 @@ class Main(bpy.types.Operator):
         vlc, active_vlc, active_object, selected_objects = self.status_cache()
         # make a list of tuples I want to export
         export_list, objects_to_delete = self.make_export_list(vlc, bake)
-        # go though the list and do the export
+        # go though the export list and do the export
         for i in export_list:
             export_col = self.create_export_col(vlc)
             path = ut.setpath(self, i[0])
@@ -65,7 +66,7 @@ class Main(bpy.types.Operator):
                 obj_and_pos_list = []
                 for ii in i[1]:
                     o = bpy.data.objects[ii]
-                    o_pos = o.location.copy()                    
+                    o_pos = o.location.copy()
                     obj_and_pos_list.append([o, o_pos])
                     o.location = (0, 0, 0)
                 FBXExport.export(self, path, export_col)
@@ -82,10 +83,10 @@ class Main(bpy.types.Operator):
         export_list = []
         objects_to_delete = []
         for col in make_list.MakeList.list_of_collections_in_root:
-            # validate & definitions
-            # if not ut.is_valid(self, col, bake, bpy.context.selected_objects, self.selected):
+            # validate
             if not ut.is_valid(self, col, bake, [], False):
                 continue
+            # definitions
             children_collections = []
             export_objects = []
             # populate export collection with objects
@@ -111,7 +112,7 @@ class Main(bpy.types.Operator):
             for i in export_list:
                 for ii in i[1]:
                     individual_export_list.append([ii, [ii]])
-            export_list = individual_export_list    
+            export_list = individual_export_list
         # if export selected is used, remove all objects that arn't selected
         if self.selected:
             selected_export_list = []
@@ -156,9 +157,13 @@ class Main(bpy.types.Operator):
             return
         for ob in objects_to_delete:
             bpy.data.objects.remove(bpy.data.objects[ob])
-            bpy.data.collections.remove(bpy.data.collections[ob])
+            bpy.data.collections.remove(bpy.data.collections[ob + "__MERGED_"])
+        for o in bpy.data.objects:
+            if "_CONFLICT__" in o.name:
+                o.name = o.name.replace("_CONFLICT__", "")            
 
     def status_reset(self, active_vlc, active_object, selected_objects):
+        return
         bpy.context.view_layer.active_layer_collection = active_vlc
         bpy.context.view_layer.objects.active = active_object
         for ob in selected_objects:
