@@ -38,6 +38,7 @@ class Main(bpy.types.Operator):
             self.call_export_new("high")
             self.call_export_new("low")
         # for special up workflow
+        # TODO check this works properly on new installs
         elif bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
             print("exporting standard - special source workflow")
             path = ut.setpathspecialcases(self, "", False)
@@ -110,7 +111,7 @@ class Main(bpy.types.Operator):
             for i in export_list:
                 for ii in i[1]:
                     individual_export_list.append([ii, [ii]])
-            export_list = individual_export_list
+            export_list = individual_export_list    
         # if export selected is used, remove all objects that arn't selected
         if self.selected:
             selected_export_list = []

@@ -64,6 +64,9 @@ class PANEL_PT_gameexport(bpy.types.Panel):
 class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
     bl_idname = __package__
 
+
+    # TODO check this works properly on new installs
+
     special_source_workflow: bpy.props.BoolProperty(
         name="Unity Source Workflow",
         default=False
