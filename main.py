@@ -40,7 +40,7 @@ class Main(bpy.types.Operator):
             self.call_export("low")
         # for special up workflow
         # TODO check this works properly on new installs
-        elif bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
+        elif bpy.context.preferences.addons['GameExport'].preferences['special_source_workflow'] and bpy.context.scene.FbxExportPath == "":
             print("exporting standard - special source workflow")
             path = ut.setpathspecialcases(self, "", False)
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_entire_scene(self))
