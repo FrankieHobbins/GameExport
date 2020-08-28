@@ -38,16 +38,18 @@ class Main(bpy.types.Operator):
             path = ut.setpath(self, bpy.path.basename(bpy.context.blend_data.filepath.replace(".blend", "")))
             self.call_export("high")
             self.call_export("low")
+        else:
+            print("exporting standard")
+            self.call_export("")
         # for special up workflow
         # TODO check this works properly on new installs
+        """
         elif bpy.context.preferences.addons['GameExport'].preferences['special_source_workflow'] and bpy.context.scene.FbxExportPath == "":
             print("exporting standard - special source workflow")
             path = ut.setpathspecialcases(self, "", False)
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_entire_scene(self))
         # standard export
-        else:
-            print("exporting standard")
-            self.call_export("")
+        """
         make_list.MakeList.clean_up(self)
         return {"FINISHED"}
 
@@ -63,7 +65,7 @@ class Main(bpy.types.Operator):
             path = ut.setpath(self, i[0])
             self.prepare_objects_for_export(i[1], export_col, obj_and_pos_list)
             FBXExport.export(self, path, export_col)
-            self.cleanup(export_col, obj_and_pos_list)
+            self.cleanup(i[1], export_col, obj_and_pos_list)
         # restore cached data
         self.cleanup_merged(objects_to_delete)
         self.status_reset(active_vlc, active_object, selected_objects)
@@ -122,16 +124,18 @@ class Main(bpy.types.Operator):
                 o_pos = o.location.copy()
                 obj_and_pos_list.append([o, o_pos])
                 o.location = (0, 0, 0)
+            if bpy.context.scene.FBXFlipUVIndex:
+                bpy.context.view_layer.objects.active = bpy.data.objects[i]
+                ut.flipUVIndex(self)
 
-        if bpy.context.scene.FBXFlipUVIndex:
-            ut.flipUVIndex(self)
-
-    def cleanup(self, export_col, obj_and_pos_list):
+    def cleanup(self, list, export_col, obj_and_pos_list):
         for ii in obj_and_pos_list:
             ii[0].location = ii[1]
 
         if bpy.context.scene.FBXFlipUVIndex:
-            ut.flipUVIndex(self)
+            for i in list:
+                bpy.context.view_layer.objects.active = bpy.data.objects[i]
+                ut.flipUVIndex(self)
 
         if not bpy.context.scene.FBXLeaveExport:
             export_col.name = "Collection To Delete"
