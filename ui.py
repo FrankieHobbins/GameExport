@@ -47,9 +47,11 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row.prop(context.scene, "FBXExportCentreMeshes", text="Centred")
         row = layout.row()
         row.prop(context.scene, "FBXExportColletionIsFolder", text="Collection is Folder")
-
-        layout.template_list("FActionList", "", bpy.data, "actions", context.object, "action_list_index", rows=2)
+        row = layout.row()
+        row.prop(context.scene, "FBXFlipUVIndex", text="Reverse UV channels")
+        
         if len(bpy.data.actions) > 0:
+            layout.template_list("FActionList", "", bpy.data, "actions", context.object, "action_list_index", rows=2)
             if bpy.types.Scene.LastAnimSelected != bpy.data.actions[bpy.context.object.action_list_index]:
                 bpy.context.object.animation_data.action = bpy.data.actions[bpy.context.object.action_list_index]
                 currentaction = bpy.context.object.animation_data.action

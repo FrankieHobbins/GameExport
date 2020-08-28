@@ -36,8 +36,8 @@ class Main(bpy.types.Operator):
         if self.bake:
             print("exporting bake")
             path = ut.setpath(self, bpy.path.basename(bpy.context.blend_data.filepath.replace(".blend", "")))
-            self.call_export_new("high")
-            self.call_export_new("low")
+            self.call_export("high")
+            self.call_export("low")
         # for special up workflow
         # TODO check this works properly on new installs
         elif bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
@@ -47,34 +47,23 @@ class Main(bpy.types.Operator):
         # standard export
         else:
             print("exporting standard")
-            self.call_export_new("")
+            self.call_export("")
         make_list.MakeList.clean_up(self)
         return {"FINISHED"}
 
-    def call_export_new(self, bake):
+    def call_export(self, bake):
         # cache state to revert later
         vlc, active_vlc, active_object, selected_objects = self.status_cache()
         # make a list of tuples I want to export
         export_list, objects_to_delete = self.make_export_list(vlc, bake)
+        obj_and_pos_list = []
         # go though the export list and do the export
         for i in export_list:
             export_col = self.create_export_col(vlc)
             path = ut.setpath(self, i[0])
-            self.prepare_objects_for_export(i[1], export_col)
-            # export, center objects if needed
-            if bpy.context.scene.FBXExportCentreMeshes:
-                obj_and_pos_list = []
-                for ii in i[1]:
-                    o = bpy.data.objects[ii]
-                    o_pos = o.location.copy()
-                    obj_and_pos_list.append([o, o_pos])
-                    o.location = (0, 0, 0)
-                FBXExport.export(self, path, export_col)
-                for ii in obj_and_pos_list:
-                    ii[0].location = ii[1]
-            else:
-                FBXExport.export(self, path, export_col)
-            self.cleanup(export_col)
+            self.prepare_objects_for_export(i[1], export_col, obj_and_pos_list)
+            FBXExport.export(self, path, export_col)
+            self.cleanup(export_col, obj_and_pos_list)
         # restore cached data
         self.cleanup_merged(objects_to_delete)
         self.status_reset(active_vlc, active_object, selected_objects)
@@ -123,11 +112,30 @@ class Main(bpy.types.Operator):
             export_list = selected_export_list
         return export_list, objects_to_delete
 
-    def prepare_objects_for_export(self, list, export_col):
+    def prepare_objects_for_export(self, list, export_col, obj_and_pos_list):
         # here we link objects from the list to the export collision
         for i in list:
             o = bpy.data.objects[i]
             export_col.objects.link(o)
+            if bpy.context.scene.FBXExportCentreMeshes:
+                o = bpy.data.objects[i]
+                o_pos = o.location.copy()
+                obj_and_pos_list.append([o, o_pos])
+                o.location = (0, 0, 0)
+
+        if bpy.context.scene.FBXFlipUVIndex:
+            ut.flipUVIndex(self)
+
+    def cleanup(self, export_col, obj_and_pos_list):
+        for ii in obj_and_pos_list:
+            ii[0].location = ii[1]
+
+        if bpy.context.scene.FBXFlipUVIndex:
+            ut.flipUVIndex(self)
+
+        if not bpy.context.scene.FBXLeaveExport:
+            export_col.name = "Collection To Delete"
+            bpy.data.collections.remove(export_col)
 
     def create_export_col(self, vlc):
         # make new collection to export to & link to scene
@@ -146,12 +154,6 @@ class Main(bpy.types.Operator):
         active_object = bpy.context.active_object
         return vlc, active_vlc, active_object, selected_objects
 
-    def cleanup(self, export_col):
-        if bpy.context.scene.FBXLeaveExport:
-            return
-        export_col.name = "Collection To Delete"
-        bpy.data.collections.remove(export_col)
-
     def cleanup_merged(self, objects_to_delete):
         if bpy.context.scene.FBXLeaveExport:
             return
@@ -160,7 +162,7 @@ class Main(bpy.types.Operator):
             bpy.data.collections.remove(bpy.data.collections[ob + "__MERGED_"])
         for o in bpy.data.objects:
             if "_CONFLICT__" in o.name:
-                o.name = o.name.replace("_CONFLICT__", "")            
+                o.name = o.name.replace("_CONFLICT__", "")
 
     def status_reset(self, active_vlc, active_object, selected_objects):
         return

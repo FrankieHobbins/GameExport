@@ -135,7 +135,7 @@ class Utils(bpy.types.Operator):
         col_name = col_name.replace("&", "")  # TODO replace with global
 
         if bpy.context.scene.FBXExportColletionIsFolder or "\\" in col_name:
-            col_name = col_name + "\\" + col_name    
+            col_name = col_name + "\\" + col_name
         path += prefix + col_name + ".fbx"
 
         try:
@@ -160,7 +160,7 @@ class Utils(bpy.types.Operator):
             path = path.replace(".Blend", ".fbx")
         return path
 
-    def actionstoNLA(self, filter):       
+    def actionstoNLA(self, filter):
         for nlatrack in bpy.context.object.animation_data.nla_tracks:
             bpy.context.object.animation_data.nla_tracks.remove(nlatrack)
 
@@ -170,4 +170,18 @@ class Utils(bpy.types.Operator):
                 bpy.context.object.animation_data.nla_tracks.new()
                 bpy.context.object.animation_data.nla_tracks[(len(bpy.context.object.animation_data.nla_tracks)-1)].name = action.name
                 bpy.context.object.animation_data.nla_tracks[(len(bpy.context.object.animation_data.nla_tracks)-1)].strips.new(action.name,0,action)
-    
+
+    def flipUVIndex(self):
+        uvl = bpy.context.view_layer.objects.active.data.uv_layers
+        if (len(uvl) == 2):
+            # set active uv to 0
+            uvl.active_index = 0
+            # get 0 name
+            name = uvl[0].name
+            # duplicate, will end up at 2
+            bpy.ops.mesh.uv_texture_add()
+            # delete 0
+            uvl.active_index = 0
+            bpy.ops.mesh.uv_texture_remove()
+            # set index 1 to be name
+            uvl[1].name = name
