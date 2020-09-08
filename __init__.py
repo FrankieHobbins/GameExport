@@ -4,11 +4,10 @@ bl_info = {
     "name": "Game Export",
     "description": "A Game Exporter",
     "author": "Frankie Hobbins",
-    "version": (1, 0, 0),
-    "blender": (2, 80, 0),
+    "version": (1, 0, 2),
+    "blender": (2, 90, 0),
     "wiki_url": "my github url here",
-    "tracker_url": "my github url here/issues",
-    "category": "Animation"
+    "category": "Import-Export"
 }
 
 
@@ -29,6 +28,7 @@ from . import ui
 # main.FirstOperator.doprint()
 
 classes = (
+    ui.ACTIONS_UL_List,
     main.Main,
     utils.Utils,
     make_list.MakeList,
@@ -36,7 +36,7 @@ classes = (
     ui.PANEL_PT_gameexport,
     ui.OpenFolder,
     ui.PANEL_PT_gameexport_addon_prefs,
-    ui.FActionList
+    ui.PathSwitcher
 )
 
 bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", subtype="DIR_PATH", description="Path to export to")
@@ -60,6 +60,7 @@ bpy.types.Scene.FBXFlipUVIndex = bpy.props.BoolProperty(name="FBXFlipUVIndex", d
 bpy.types.Object.action_list_index = bpy.props.IntProperty()
 bpy.types.Action.Export = bpy.props.BoolProperty(name="Export")
 bpy.types.Scene.LastAnimSelected = bpy.props.StringProperty(name="Last Anim Selected")
+bpy.types.Scene.ExportStringReplace = bpy.props.StringProperty(name="what")
 
 def register():
     from bpy.utils import register_class
