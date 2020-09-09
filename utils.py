@@ -125,8 +125,12 @@ class Utils(bpy.types.Operator):
             for prop in properties:
                 setattr(m_dst, prop, getattr(m_src, prop))
 
-    def setpath(self, col_name):
+    def setpath(self, col_name):        
         path = bpy.context.scene.FbxExportPath
+        print("yarp")
+        print(path)
+        path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences['user_path'])
+        print(path)
         prefix = bpy.context.scene.FbxExportPrefix
         if path == "":
             path = os.path.dirname(bpy.data.filepath) + "\\"
@@ -134,10 +138,13 @@ class Utils(bpy.types.Operator):
             path = os.path.dirname(bpy.data.filepath) + "\\" + path
         col_name = col_name.replace("&", "")  # TODO replace with global
 
-        if bpy.context.scene.FBXExportColletionIsFolder or "\\" in col_name:
+        if bpy.context.scene.FBXExportColletionIsFolder:
             col_name = col_name + "\\" + col_name
         path += prefix + col_name + ".fbx"
 
+
+
+        
         try:
             dir_name = os.path.dirname(path)
             os.makedirs(dir_name)

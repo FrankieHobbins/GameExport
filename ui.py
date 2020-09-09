@@ -47,7 +47,7 @@ class PathSwitcher(bpy.types.PropertyGroup):
 
 class ACTIONS_UL_List(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
-        layout.label(text="", translate=False, icon_value=icon)        
+        layout.label(text="", translate=False, icon_value=icon)
         if bpy.context.active_object is not None:
             row = layout.row(align=False)
             row.prop(item,"name", text="", emboss=False)
@@ -75,6 +75,9 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         props.selected = False
         row = layout.row()
         row.prop(context.scene, "FbxExportPath", text="path")
+        path = bpy.context.scene.FbxExportPath
+        path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences['user_path'])
+        layout.label(text="export to:           " + path)
         row = layout.row()
         row.prop(context.scene, "FbxExportPrefix", text="prefix")
         row = layout.row()
@@ -84,24 +87,27 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FBXFixUnityRotation", text="Fix Unity Rotation")
         row = layout.row()
-        row.prop(context.scene, "FBXLeaveExport", text="Leave Objects")
-        row = layout.row()
         row.prop(context.scene, "FBXExportSM", text="Individual Objets")
         row = layout.row()
         row.prop(context.scene, "FBXExportCentreMeshes", text="Centred")
         row = layout.row()
         row.prop(context.scene, "FBXExportColletionIsFolder", text="Collection is Folder")
         row = layout.row()
-        row.prop(context.scene, "FBXFlipUVIndex", text="Reverse UV channels")       
+        row.prop(context.scene, "FBXFlipUVIndex", text="Reverse UV channels")
+        row = layout.row()
+        row.prop(context.scene, "FBXLeaveExport", text="DEBUG: Leave Objects")        
         if len(bpy.data.actions) > 0:
-            layout.template_list("ACTIONS_UL_List", "", bpy.data, "actions", context.object, "action_list_index", rows=2)            
-            if bpy.types.Scene.LastAnimSelected != bpy.data.actions[bpy.context.object.action_list_index]:
-                bpy.context.object.animation_data.action = bpy.data.actions[bpy.context.object.action_list_index]
-                currentaction = bpy.context.object.animation_data.action
-                keys = currentaction.frame_range
-                lastkey = (keys[-1])
-                bpy.context.scene.frame_end = lastkey
-            bpy.types.Scene.LastAnimSelected = bpy.data.actions[bpy.context.object.action_list_index]  # lets you selected with the action dropdown from action editor      
+            layout.template_list("ACTIONS_UL_List", "", bpy.data, "actions", context.object, "action_list_index", rows=2)
+            try:
+                if bpy.types.Scene.LastAnimSelected != bpy.data.actions[bpy.context.object.action_list_index]:
+                    bpy.context.object.animation_data.action = bpy.data.actions[bpy.context.object.action_list_index]
+                    currentaction = bpy.context.object.animation_data.action
+                    keys = currentaction.frame_range
+                    lastkey = (keys[-1])
+                    bpy.context.scene.frame_end = lastkey
+                bpy.types.Scene.LastAnimSelected = bpy.data.actions[bpy.context.object.action_list_index]  # lets you selected with the action dropdown from action editor      
+            except:
+                pass
 
         # row.operator('gameexport.openfolder', text='Path')
 
@@ -129,6 +135,10 @@ class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
         default='unity'
     )
 
+    user_path: bpy.props.StringProperty(
+        name="$path$",
+    )
+
     path_switch: bpy.props.CollectionProperty(
         type=PathSwitcher
     )
@@ -139,4 +149,5 @@ class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
         row.prop(self, 'special_source_workflow', expand=True)
         row.prop(self, 'default_engine_export', expand=False)
         row = layout.row()
+        row.prop(self, 'user_path')
         row.prop(self, 'path_switch')

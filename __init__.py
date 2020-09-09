@@ -29,14 +29,14 @@ from . import ui
 
 classes = (
     ui.ACTIONS_UL_List,
+    ui.PathSwitcher,
     main.Main,
     utils.Utils,
     make_list.MakeList,
     merge_collection.MergeCollection,
     ui.PANEL_PT_gameexport,
     ui.OpenFolder,
-    ui.PANEL_PT_gameexport_addon_prefs,
-    ui.PathSwitcher
+    ui.PANEL_PT_gameexport_addon_prefs
 )
 
 bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", subtype="DIR_PATH", description="Path to export to")

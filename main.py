@@ -181,7 +181,7 @@ class FBXExport(bpy.types.Operator):
     bl_idname = "gameexport.fbxexport"
     bl_description = "This is where export gets called from"
 
-    def export(self, path, export_col):
+    def export(self, path, export_col):        
         if (bpy.context.scene.FbxExportEngine == 'default'):  # TODO make work good
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity(self))
         elif (bpy.context.scene.FbxExportEngine == 'unity'):
