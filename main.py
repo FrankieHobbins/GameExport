@@ -32,6 +32,7 @@ class Main(bpy.types.Operator):
         make_list.MakeList.reset(self)
         make_list.MakeList.make_list(self)
         print(self.selected)
+        bpy.ops.object.mode_set(mode='OBJECT')
         # for baking
         if self.bake:
             print("exporting bake")
