@@ -81,9 +81,25 @@ class Main(bpy.types.Operator):
             # definitions
             children_collections = []
             export_objects = []
+            origin_object = False
             # populate export collection with objects
             ut.get_all_children_collections(self, col, children_collections)
             children_collections.append(col)
+
+            for child in children_collections:
+                for object in child.objects:
+                    if "origin" in object.name.lower():
+                        origin_object = object
+
+            if origin_object:
+                for child in children_collections:
+                    for object in child.objects:
+                        if object.type == "EMPTY":
+                            if "origin" not in object.name.lower():
+                                object.FBXExportOffset = (object.location[0] - origin_object.location[0],
+                                                          object.location[1] - origin_object.location[1],
+                                                          object.location[2] - origin_object.location[2])
+
             for child in children_collections:
                 # validate children collectins
                 if ut.is_valid(self, child, False, bpy.context.selected_objects, self.selected):
@@ -120,11 +136,14 @@ class Main(bpy.types.Operator):
         for i in list:
             o = bpy.data.objects[i]
             export_col.objects.link(o)
+
             if bpy.context.scene.FBXExportCentreMeshes:
                 o = bpy.data.objects[i]
                 o_pos = o.location.copy()
                 obj_and_pos_list.append([o, o_pos])
                 o.location = (0, 0, 0)
+                if o.FBXExportOffset:
+                    o.location = o.FBXExportOffset
             if bpy.context.scene.FBXFlipUVIndex:
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
@@ -182,7 +201,7 @@ class FBXExport(bpy.types.Operator):
     bl_idname = "gameexport.fbxexport"
     bl_description = "This is where export gets called from"
 
-    def export(self, path, export_col):        
+    def export(self, path, export_col):
         if (bpy.context.scene.FbxExportEngine == 'default'):  # TODO make work good
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity(self))
         elif (bpy.context.scene.FbxExportEngine == 'unity'):
@@ -216,6 +235,8 @@ class FBXExport(bpy.types.Operator):
 
     def export_fbx_settings_unity(self):
         object_types = {'OTHER', 'MESH', 'ARMATURE'}
+        if bpy.context.scene.FBXKeepEmpties:
+            object_types = {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'}
         if self.bake:
             object_types = {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'}
         return {

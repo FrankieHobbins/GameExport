@@ -51,8 +51,9 @@ class MergeCollection(bpy.types.Operator):
             if "origin" in o.name.lower():
                 origin_object = o.location.copy()
             print(col.name + "||" + o.name)
+
         # select objects and join
-        if len(obj_list) > 0:
+        if len(obj_list) > 0:            
             bpy.context.view_layer.objects.active = obj_list[0]
             c["active_object"] = obj_list[0]
             c["selected_editable_objects"] = obj_list
@@ -65,7 +66,6 @@ class MergeCollection(bpy.types.Operator):
                 if o.name == new_name:
                     o.name += "_CONFLICT__"
             bpy.context.active_object.name = new_name
-
             if origin_object:
                 print(origin_object)
                 org_loc = bpy.context.scene.cursor.location

@@ -59,6 +59,7 @@ bpy.types.Scene.FBXFixUnityRotation = bpy.props.BoolProperty(name="FBXFixUnityRo
 bpy.types.Scene.FBXFlipUVIndex = bpy.props.BoolProperty(name="FBXFlipUVIndex", default=False, description="Set UV0 to be UV1 and UV1 to be UV0")
 bpy.types.Scene.FBXKeepEmpties = bpy.props.BoolProperty(name="FBXKeepEmpties", default=False, description="Keep empties, apart from origins")
 bpy.types.Object.action_list_index = bpy.props.IntProperty()
+bpy.types.Object.FBXExportOffset = bpy.props.FloatVectorProperty(size=3)
 bpy.types.Action.Export = bpy.props.BoolProperty(name="Export")
 bpy.types.Scene.LastAnimSelected = bpy.props.StringProperty(name="Last Anim Selected")
 bpy.types.Scene.ExportStringReplace = bpy.props.StringProperty(name="what")
