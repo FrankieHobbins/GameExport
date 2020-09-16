@@ -91,6 +91,8 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FBXExportCentreMeshes", text="Centred")
         row = layout.row()
+        row.prop(context.scene, "FBXKeepEmpties", text="Keep Empties")
+        row = layout.row()
         row.prop(context.scene, "FBXExportColletionIsFolder", text="Collection is Folder")
         row = layout.row()
         row.prop(context.scene, "FBXFlipUVIndex", text="Reverse UV channels")

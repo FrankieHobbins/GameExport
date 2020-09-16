@@ -57,6 +57,7 @@ bpy.types.Scene.FBXExportColletionIsFolder = bpy.props.BoolProperty(name="FBXExp
 bpy.types.Scene.FBXLeaveExport = bpy.props.BoolProperty(name="FBXLeaveExport", default=False, description="Debug option to see whats been exported")
 bpy.types.Scene.FBXFixUnityRotation = bpy.props.BoolProperty(name="FBXFixUnityRotation", default=False, description="Rotate on export to fix the issue where models appaer in unity with rotation offset")
 bpy.types.Scene.FBXFlipUVIndex = bpy.props.BoolProperty(name="FBXFlipUVIndex", default=False, description="Set UV0 to be UV1 and UV1 to be UV0")
+bpy.types.Scene.FBXKeepEmpties = bpy.props.BoolProperty(name="FBXKeepEmpties", default=False, description="Keep empties, apart from origins")
 bpy.types.Object.action_list_index = bpy.props.IntProperty()
 bpy.types.Action.Export = bpy.props.BoolProperty(name="Export")
 bpy.types.Scene.LastAnimSelected = bpy.props.StringProperty(name="Last Anim Selected")
