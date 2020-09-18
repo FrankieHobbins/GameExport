@@ -12,6 +12,7 @@ class Main(bpy.types.Operator):
     bl_label = "Main"
     bl_idname = "gameexport.export"
     bl_description = "This is where export gets called from"
+    bl_options = {"REGISTER", "UNDO"}
 
     bake: bpy.props.BoolProperty(
         name="bake",
@@ -200,6 +201,7 @@ class FBXExport(bpy.types.Operator):
     bl_label = "Export FBX"
     bl_idname = "gameexport.fbxexport"
     bl_description = "This is where export gets called from"
+    bl_options = {"REGISTER", "UNDO"}
 
     def export(self, path, export_col):
         if (bpy.context.scene.FbxExportEngine == 'default'):  # TODO make work good

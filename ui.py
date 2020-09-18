@@ -6,6 +6,7 @@ class OpenFolder(bpy.types.Operator):
     bl_label = "Open Export Folder"
     bl_idname = "gameexport.openfolder"
     bl_description = "Open the export folder"
+    bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
         # open folder in windows explorer
@@ -59,6 +60,7 @@ class PANEL_PT_gameexport(bpy.types.Panel):
     bl_category = "GameExport"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
+
     def draw(self, context):
         layout = self.layout
         row = layout.row()

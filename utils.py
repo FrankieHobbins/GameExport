@@ -9,6 +9,7 @@ class Utils(bpy.types.Operator):
     bl_label = "Create"
     bl_idname = "gameexport.utils"
     bl_description = "A demo operator"
+    bl_options = {"UNDO"}
 
     def get_all_children_collections(self, col, col_children):
         if col.children:

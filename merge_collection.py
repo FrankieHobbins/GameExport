@@ -6,6 +6,7 @@ class MergeCollection(bpy.types.Operator):
     bl_label = "Merge Collection"
     bl_idname = "gameexport.mergecollection"
     bl_description = "Used to merge all objects inside a collection into 1"
+    bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
         self.merge_active()

@@ -10,6 +10,7 @@ class MakeList(bpy.types.Operator):
     bl_label = "Make List"
     bl_idname = "gameexport.makelist"
     bl_description = "A demo operator"
+    bl_options = {"UNDO"}
 
     list_of_collections_in_root = []
     list_of_collections = []
