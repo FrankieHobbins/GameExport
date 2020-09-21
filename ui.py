@@ -95,11 +95,13 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FBXKeepEmpties", text="Keep Empties")
         row = layout.row()
+        row.prop(context.scene, "FBXFreezeInstances", text="Freeze Instances")
+        row = layout.row()
         row.prop(context.scene, "FBXExportColletionIsFolder", text="Collection is Folder")
         row = layout.row()
         row.prop(context.scene, "FBXFlipUVIndex", text="Reverse UV channels")
         row = layout.row()
-        row.prop(context.scene, "FBXLeaveExport", text="DEBUG: Leave Objects")        
+        row.prop(context.scene, "FBXLeaveExport", text="DEBUG: Leave Objects")
         if len(bpy.data.actions) > 0:
             layout.template_list("ACTIONS_UL_List", "", bpy.data, "actions", context.object, "action_list_index", rows=2)
             try:

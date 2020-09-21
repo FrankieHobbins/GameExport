@@ -29,32 +29,43 @@ class MergeCollection(bpy.types.Operator):
         bpy.context.view_layer.layer_collection.collection.children.link(col_copy)
         # merge all objects into one
         MergeCollection.merge(self, col_copy)
-        return col_copy.objects[0]
+        return col_copy.objects
 
     def merge(self, col):
         c = {}
         origin_object = False
         c["active_object"] = bpy.context.active_object
         obj_list = [o for o in col.objects if o.type == 'MESH']
-        empty_list = [o for o in col.objects if o.type == 'EMPTY']
+        empty_list = [o for o in col.objects if o.type == 'EMPTY' and o.instance_type == "COLLECTION"]
 
-        """
         # deal with empty objects that could have be instances of meshes
-        if len(empty_list) > 0:
-            print(f" **WARNING** Attempting to merge objects that are instanced, may not have correct result {bpy.context.selected_editable_objects}")
-            bpy.context.view_layer.objects.active = empty_list[0]
-            c["selected_editable_objects"] = empty_list
-            bpy.ops.object.duplicates_make_real()
-            obj_list += bpy.context.selected_editable_objects
-        """
+        if bpy.context.scene.FBXFreezeInstances:
+            if len(empty_list) > 0:
+                print(f" **WARNING** Attempting to merge objects that are instanced, may not have correct result {bpy.context.selected_editable_objects}")
+                bpy.context.view_layer.objects.active = empty_list[0]
+                print(list(empty_list))
+                for o in empty_list:
+                    o.select_set(True)
+                bpy.ops.object.duplicates_make_real()
+                for ob in bpy.context.selected_objects:
+                    if ob.type == "MESH":
+                        ob.data = ob.data.copy()  # make objects single user
+                obj_list += bpy.context.selected_editable_objects
+            for o in empty_list:
+                print(o)
+                bpy.data.objects.remove(o)
 
         for o in col.objects:
             if "origin" in o.name.lower():
                 origin_object = o.location.copy()
             print(col.name + "||" + o.name)
 
+        for o in obj_list:
+            if o.type == "EMPTY":
+                obj_list.remove(o)
+
         # select objects and join
-        if len(obj_list) > 0:            
+        if len(obj_list) > 0:
             bpy.context.view_layer.objects.active = obj_list[0]
             c["active_object"] = obj_list[0]
             c["selected_editable_objects"] = obj_list

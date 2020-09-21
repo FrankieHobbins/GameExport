@@ -106,7 +106,15 @@ class Utils(bpy.types.Operator):
                 for vertexGroup in obj.vertex_groups:
                     new_obj.vertex_groups.new(name=vertexGroup.name)
                 Utils.copy_modifier(self, obj, new_obj)
-            if obj.type == "EMPTY":  # and "origin" in obj.name.lower():
+            elif obj.type == "EMPTY" and bpy.context.scene.FBXFreezeInstances and obj.instance_type == "COLLECTION":
+                new_empty = bpy.data.objects.new("empty", None)
+                new_empty.name = obj.name + "_DUPLICATE"
+                new_col.objects.link(new_empty)
+                new_empty.matrix_world = obj.matrix_world
+                new_empty.rotation_euler = obj.rotation_euler
+                new_empty.instance_type = obj.instance_type
+                new_empty.instance_collection = obj.instance_collection
+            elif obj.type == "EMPTY":  # and "origin" in obj.name.lower():
                 new_col.objects.link(obj)
 
     def copy_modifier(self, source, target):

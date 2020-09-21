@@ -58,6 +58,9 @@ class Main(bpy.types.Operator):
     def call_export(self, bake):
         # cache state to revert later
         vlc, active_vlc, active_object, selected_objects = self.status_cache()
+        # deselect everything
+        for o in bpy.context.selected_objects:
+            o.select_set(False)
         # make a list of tuples I want to export
         export_list, objects_to_delete = self.make_export_list(vlc, bake)
         obj_and_pos_list = []
@@ -86,12 +89,10 @@ class Main(bpy.types.Operator):
             # populate export collection with objects
             ut.get_all_children_collections(self, col, children_collections)
             children_collections.append(col)
-
             for child in children_collections:
                 for object in child.objects:
                     if "origin" in object.name.lower():
                         origin_object = object
-
             if origin_object:
                 for child in children_collections:
                     for object in child.objects:
@@ -100,20 +101,22 @@ class Main(bpy.types.Operator):
                                 object.FBXExportOffset = (object.location[0] - origin_object.location[0],
                                                           object.location[1] - origin_object.location[1],
                                                           object.location[2] - origin_object.location[2])
-
             for child in children_collections:
                 # validate children collectins
                 if ut.is_valid(self, child, False, bpy.context.selected_objects, self.selected):
                     # if merge is needed do merge & put the new objects into the list
                     if ut.should_merge(self, child):
-                        merged_object = merge_collection.merge_specified(self, child)
-                        objects_to_delete.append(merged_object.name)
-                        export_objects.append(merged_object.name)
-                        merged_object.select_set(True)
+                        merged_objects = merge_collection.merge_specified(self, child)
+                        for o in merged_objects:
+                            objects_to_delete.append(o.name)
+                            export_objects.append(o.name)
+                            o.select_set(True)
                     # else put all objects into export list
                     else:
                         for object in child.objects:
                             export_objects.append(object.name)
+            # dont export offset
+            export_objects = [i for i in export_objects if "offset" not in i.lower()]
             export_list.append([col.name, export_objects])
         # if export as individuals is set, want to break the list up so we dont use collections and each individual object has its own list entry
         if bpy.context.scene.FBXExportSM:
@@ -130,6 +133,10 @@ class Main(bpy.types.Operator):
                     if bpy.data.objects[ii] in bpy.context.selected_objects:
                         selected_export_list.append([ii, [ii]])
             export_list = selected_export_list
+        # dont delete origin
+        for o in objects_to_delete:
+            if "rigin" in o:
+                objects_to_delete.remove(o)
         return export_list, objects_to_delete
 
     def prepare_objects_for_export(self, list, export_col, obj_and_pos_list):
@@ -137,7 +144,6 @@ class Main(bpy.types.Operator):
         for i in list:
             o = bpy.data.objects[i]
             export_col.objects.link(o)
-
             if bpy.context.scene.FBXExportCentreMeshes:
                 o = bpy.data.objects[i]
                 o_pos = o.location.copy()
@@ -152,12 +158,10 @@ class Main(bpy.types.Operator):
     def cleanup(self, list, export_col, obj_and_pos_list):
         for ii in obj_and_pos_list:
             ii[0].location = ii[1]
-
         if bpy.context.scene.FBXFlipUVIndex:
             for i in list:
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
-
         if not bpy.context.scene.FBXLeaveExport:
             export_col.name = "Collection To Delete"
             bpy.data.collections.remove(export_col)
@@ -184,13 +188,14 @@ class Main(bpy.types.Operator):
             return
         for ob in objects_to_delete:
             bpy.data.objects.remove(bpy.data.objects[ob])
-            bpy.data.collections.remove(bpy.data.collections[ob + "__MERGED_"])
         for o in bpy.data.objects:
             if "_CONFLICT__" in o.name:
                 o.name = o.name.replace("_CONFLICT__", "")
+        for c in bpy.data.collections:
+            if "_MERGED_" in c.name:
+                bpy.data.collections.remove(c)
 
     def status_reset(self, active_vlc, active_object, selected_objects):
-        return
         bpy.context.view_layer.active_layer_collection = active_vlc
         bpy.context.view_layer.objects.active = active_object
         for ob in selected_objects:

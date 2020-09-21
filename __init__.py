@@ -56,6 +56,7 @@ bpy.types.Scene.FBXLeaveExport = bpy.props.BoolProperty(name="FBXLeaveExport", d
 bpy.types.Scene.FBXFixUnityRotation = bpy.props.BoolProperty(name="FBXFixUnityRotation", default=False, description="Rotate on export to fix the issue where models appaer in unity with rotation offset")
 bpy.types.Scene.FBXFlipUVIndex = bpy.props.BoolProperty(name="FBXFlipUVIndex", default=False, description="Set UV0 to be UV1 and UV1 to be UV0")
 bpy.types.Scene.FBXKeepEmpties = bpy.props.BoolProperty(name="FBXKeepEmpties", default=False, description="Keep empties, apart from origins")
+bpy.types.Scene.FBXFreezeInstances = bpy.props.BoolProperty(name="FBXFreezeInstances", default=False, description="Turn instance geo into real geo")
 bpy.types.Object.action_list_index = bpy.props.IntProperty()
 bpy.types.Object.FBXExportOffset = bpy.props.FloatVectorProperty(size=3)
 bpy.types.Action.Export = bpy.props.BoolProperty(name="Export")
