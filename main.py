@@ -78,6 +78,7 @@ class Main(bpy.types.Operator):
     def make_export_list(self, vlc, bake):
         export_list = []
         objects_to_delete = []
+        objects_to_not_delete = []
         for col in make_list.MakeList.list_of_collections_in_root:
             # validate
             if not ut.is_valid(self, col, bake, [], False):
@@ -90,20 +91,12 @@ class Main(bpy.types.Operator):
             ut.get_all_children_collections(self, col, children_collections)
             children_collections.append(col)
             for child in children_collections:
-                for object in child.objects:
-                    if "origin" in object.name.lower():
-                        origin_object = object
-            if origin_object:
-                for child in children_collections:
-                    for object in child.objects:
-                        if object.type == "EMPTY":
-                            if "origin" not in object.name.lower():
-                                object.FBXExportOffset = (object.location[0] - origin_object.location[0],
-                                                          object.location[1] - origin_object.location[1],
-                                                          object.location[2] - origin_object.location[2])
-            for child in children_collections:
                 # validate children collectins
                 if ut.is_valid(self, child, False, bpy.context.selected_objects, self.selected):
+                    # dont delete existing empties
+                    for o in child.objects:
+                        if o.type == "EMPTY":
+                            objects_to_not_delete.append(o.name)
                     # if merge is needed do merge & put the new objects into the list
                     if ut.should_merge(self, child):
                         merged_objects = merge_collection.merge_specified(self, child)
@@ -133,13 +126,25 @@ class Main(bpy.types.Operator):
                     if bpy.data.objects[ii] in bpy.context.selected_objects:
                         selected_export_list.append([ii, [ii]])
             export_list = selected_export_list
-        # dont delete origin
-        for o in objects_to_delete:
-            if "rigin" in o:
-                objects_to_delete.remove(o)
+        # dont delete empties that already existed
+        for i in objects_to_not_delete:
+            if i in objects_to_delete:
+                objects_to_delete.remove(i)
         return export_list, objects_to_delete
 
     def prepare_objects_for_export(self, list, export_col, obj_and_pos_list):
+        origin_object = False
+        for object in list:
+            if "origin" in object.lower():
+                origin_object = bpy.data.objects[object]
+        if origin_object:
+            for object in list:
+                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" in object:
+                    if "origin" not in object.lower():
+                        o = bpy.data.objects[object]
+                        o.FBXExportOffset = (o.location[0] - origin_object.location[0],
+                                             o.location[1] - origin_object.location[1],
+                                             o.location[2] - origin_object.location[2])
         # here we link objects from the list to the export collision
         for i in list:
             o = bpy.data.objects[i]

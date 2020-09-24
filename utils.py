@@ -120,16 +120,13 @@ class Utils(bpy.types.Operator):
     def copy_modifier(self, source, target):
         active_object = source
         target_object = target
-
         for m_src in active_object.modifiers:
             m_dst = target_object.modifiers.get(m_src.name, None)
             if not m_dst:
                 m_dst = target_object.modifiers.new(m_src.name, m_src.type)
-
             # collect names of writable properties
             properties = [p.identifier for p in m_src.bl_rna.properties
                           if not p.is_readonly]
-
             # copy those properties
             for prop in properties:
                 setattr(m_dst, prop, getattr(m_src, prop))
@@ -143,11 +140,9 @@ class Utils(bpy.types.Operator):
         elif path[1] != ":":
             path = os.path.dirname(bpy.data.filepath) + "\\" + path
         col_name = col_name.replace("&", "")  # TODO replace with global
-
         if bpy.context.scene.FBXExportColletionIsFolder:
             col_name = col_name + "\\" + col_name
         path += prefix + col_name + ".fbx"
-
         try:
             dir_name = os.path.dirname(path)
             os.makedirs(dir_name)

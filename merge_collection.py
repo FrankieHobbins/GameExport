@@ -32,18 +32,15 @@ class MergeCollection(bpy.types.Operator):
         return col_copy.objects
 
     def merge(self, col):
-        c = {}
+        # merge all objects in collcetion
         origin_object = False
-        c["active_object"] = bpy.context.active_object
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY' and o.instance_type == "COLLECTION"]
-
+        bpy.ops.object.select_all(action='DESELECT')
         # deal with empty objects that could have be instances of meshes
         if bpy.context.scene.FBXFreezeInstances:
             if len(empty_list) > 0:
-                print(f" **WARNING** Attempting to merge objects that are instanced, may not have correct result {bpy.context.selected_editable_objects}")
                 bpy.context.view_layer.objects.active = empty_list[0]
-                print(list(empty_list))
                 for o in empty_list:
                     o.select_set(True)
                 bpy.ops.object.duplicates_make_real()
@@ -51,26 +48,28 @@ class MergeCollection(bpy.types.Operator):
                     if ob.type == "MESH":
                         ob.data = ob.data.copy()  # make objects single user
                 obj_list += bpy.context.selected_editable_objects
+            # remove surplus empties
             for o in empty_list:
-                print(o)
                 bpy.data.objects.remove(o)
-
+        # find origin
         for o in col.objects:
             if "origin" in o.name.lower():
                 origin_object = o.location.copy()
-            print(col.name + "||" + o.name)
-
-        for o in obj_list:
+        # remove objects from list we dont want to merge
+        new_list = obj_list.copy()
+        for o in new_list:
             if o.type == "EMPTY":
                 obj_list.remove(o)
-
+            if "COL_BOX" in o.name:  # TODO: add to prefs
+                obj_list.remove(o)
+        bpy.ops.object.select_all(action='DESELECT')
         # select objects and join
         if len(obj_list) > 0:
+            for o in obj_list:
+                o.select_set(True)
             bpy.context.view_layer.objects.active = obj_list[0]
-            c["active_object"] = obj_list[0]
-            c["selected_editable_objects"] = obj_list
             MergeCollection.apply_modifiers(self, col)
-            bpy.ops.object.join(c)
+            bpy.ops.object.join()
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             # fix to stop conflicts with new merged objects against old objects
             new_name = col.name.replace("__MERGED_", "")
@@ -78,18 +77,28 @@ class MergeCollection(bpy.types.Operator):
                 if o.name == new_name:
                     o.name += "_CONFLICT__"
             bpy.context.active_object.name = new_name
+            # set origin
             if origin_object:
-                print(origin_object)
                 org_loc = bpy.context.scene.cursor.location
                 bpy.context.scene.cursor.location = origin_object
                 bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
                 bpy.context.scene.cursor.location = org_loc
+        # deal with objects we didnt want to merge but want to keep their name
+        for o in col.objects:
+            if "_M_" in o.name:
+                new_name = o.name.replace("_M_", "")
+                bpy.data.objects[new_name].name = new_name + "_CONFLICT__"
+                o.name = new_name
 
     def apply_modifiers(self, col):
+        sel_obj_cache = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
         for obj in col.objects:
             obj.select_set(True)
         bpy.ops.object.convert(target='MESH')
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in sel_obj_cache:
+            obj.select_set(True)
 
     def rename_merge_collection(self, name):
         if "&" in name:
