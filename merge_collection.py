@@ -36,7 +36,8 @@ class MergeCollection(bpy.types.Operator):
         origin_object = False
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY' and o.instance_type == "COLLECTION"]
-        bpy.ops.object.select_all(action='DESELECT')
+        for o in bpy.data.objects:
+            o.select_set(False)
         # deal with empty objects that could have be instances of meshes
         if bpy.context.scene.FBXFreezeInstances:
             if len(empty_list) > 0:
@@ -62,9 +63,11 @@ class MergeCollection(bpy.types.Operator):
                 obj_list.remove(o)
             if "COL_BOX" in o.name:  # TODO: add to prefs
                 obj_list.remove(o)
-        bpy.ops.object.select_all(action='DESELECT')
+
         # select objects and join
         if len(obj_list) > 0:
+            for ob in bpy.context.selected_objects:
+                ob.select_set = False
             for o in obj_list:
                 o.select_set(True)
             bpy.context.view_layer.objects.active = obj_list[0]
@@ -89,14 +92,18 @@ class MergeCollection(bpy.types.Operator):
                 new_name = o.name.replace("_M_", "")
                 bpy.data.objects[new_name].name = new_name + "_CONFLICT__"
                 o.name = new_name
+        for o in bpy.data.objects:
+            o.select_set(False)
 
     def apply_modifiers(self, col):
         sel_obj_cache = bpy.context.selected_objects
-        bpy.ops.object.select_all(action='DESELECT')
+        for ob in bpy.context.selected_objects:
+            ob.select = False
         for obj in col.objects:
             obj.select_set(True)
         bpy.ops.object.convert(target='MESH')
-        bpy.ops.object.select_all(action='DESELECT')
+        for ob in bpy.context.selected_objects:
+            ob.select = False
         for obj in sel_obj_cache:
             obj.select_set(True)
 
