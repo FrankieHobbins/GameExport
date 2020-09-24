@@ -139,17 +139,18 @@ class Main(bpy.types.Operator):
                 origin_object = bpy.data.objects[object]
         if origin_object:
             for object in list:
-                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" in object:
+                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" in object or "OUTLINE" in object:
                     if "origin" not in object.lower():
-                        o = bpy.data.objects[object]
-                        o.FBXExportOffset = (o.location[0] - origin_object.location[0],
-                                             o.location[1] - origin_object.location[1],
-                                             o.location[2] - origin_object.location[2])
+                        if not bpy.data.objects[object].parent:
+                            o = bpy.data.objects[object]
+                            o.FBXExportOffset = (o.location[0] - origin_object.location[0],
+                                                 o.location[1] - origin_object.location[1],
+                                                 o.location[2] - origin_object.location[2])
         # here we link objects from the list to the export collision
         for i in list:
             o = bpy.data.objects[i]
             export_col.objects.link(o)
-            if bpy.context.scene.FBXExportCentreMeshes:
+            if bpy.context.scene.FBXExportCentreMeshes and not o.parent:
                 o = bpy.data.objects[i]
                 o_pos = o.location.copy()
                 obj_and_pos_list.append([o, o_pos])

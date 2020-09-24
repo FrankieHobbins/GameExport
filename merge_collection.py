@@ -44,7 +44,7 @@ class MergeCollection(bpy.types.Operator):
                 bpy.context.view_layer.objects.active = empty_list[0]
                 for o in empty_list:
                     o.select_set(True)
-                bpy.ops.object.duplicates_make_real()
+                bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=True)
                 for ob in bpy.context.selected_objects:
                     if ob.type == "MESH":
                         ob.data = ob.data.copy()  # make objects single user
@@ -61,13 +61,13 @@ class MergeCollection(bpy.types.Operator):
         for o in new_list:
             if o.type == "EMPTY":
                 obj_list.remove(o)
-            if "COL_BOX" in o.name:  # TODO: add to prefs
+            if "COL_BOX" in o.name or "OUTLINE" in o.name:  # TODO: add to prefs
                 obj_list.remove(o)
-
         # select objects and join
         if len(obj_list) > 0:
             for ob in bpy.context.selected_objects:
-                ob.select_set = False
+                print(ob)
+                ob.select_set(False)
             for o in obj_list:
                 o.select_set(True)
             bpy.context.view_layer.objects.active = obj_list[0]
@@ -98,12 +98,12 @@ class MergeCollection(bpy.types.Operator):
     def apply_modifiers(self, col):
         sel_obj_cache = bpy.context.selected_objects
         for ob in bpy.context.selected_objects:
-            ob.select = False
+            ob.select_set(False)
         for obj in col.objects:
             obj.select_set(True)
         bpy.ops.object.convert(target='MESH')
         for ob in bpy.context.selected_objects:
-            ob.select = False
+            ob.select_set(False)
         for obj in sel_obj_cache:
             obj.select_set(True)
 
