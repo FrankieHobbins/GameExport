@@ -22,8 +22,10 @@ class FBXExport(bpy.types.Operator):
 
     def unity_export_rotation(export_col, set, do):
         if do:
-            if set:
-                for i in export_col.objects:
+            for i in export_col.objects:
+                if "COL_BOX" in i.name:
+                    continue
+                if set:
                     if i.type == 'MESH':
                         bpy.ops.object.select_all(action='DESELECT')
                         # bpy.context.view_layer.objects.active = i
@@ -31,16 +33,13 @@ class FBXExport(bpy.types.Operator):
                         i.rotation_euler[0] -= 1.5708  # 90 deg in radians
                         bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
                         i.rotation_euler[0] += 1.5708  # 90 deg in radians
-                        return
-            elif not set:
-                for i in export_col.objects:
+                elif not set:
                     if i.type == 'MESH':
                         bpy.ops.object.select_all(action='DESELECT')
                         # bpy.context.view_layer.objects.active = i
                         i.select_set(True)
                         bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
                         i.select_set(False)
-                        return
 
     def export_fbx_settings_unity(self):
         object_types = {'OTHER', 'MESH', 'ARMATURE'}
