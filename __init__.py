@@ -4,7 +4,7 @@ bl_info = {
     "name": "Game Export",
     "description": "A Game Exporter",
     "author": "Frankie Hobbins",
-    "version": (1, 1, 1),
+    "version": (1, 1, 2),
     "blender": (2, 90, 0),
     "wiki_url": "my github url here",
     "category": "Import-Export"
@@ -18,12 +18,14 @@ if "main" in locals():
     importlib.reload(merge_collection)
     importlib.reload(make_list)
     importlib.reload(ui)
+    importlib.reload(export)
 
 from . import make_list
 from . import merge_collection
 from . import utils
 from . import main
 from . import ui
+from . import export
 
 classes = (
     ui.ACTIONS_UL_List,
@@ -34,20 +36,21 @@ classes = (
     merge_collection.MergeCollection,
     ui.PANEL_PT_gameexport,
     ui.OpenFolder,
-    ui.PANEL_PT_gameexport_addon_prefs
+    ui.PANEL_PT_gameexport_addon_prefs,
+    export.FBXExport
 )
 
 bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", default="", subtype="DIR_PATH", description="Path to export to")
 bpy.types.Scene.FbxExportPrefix = bpy.props.StringProperty(name="FbxExportPrefix", description="Prefix to put before each fbx")
 bpy.types.Scene.FbxExportScale = bpy.props.FloatProperty(name="FbxExportScale", default=1.0, description="Fbx Export Scale")
 bpy.types.Scene.FbxExportEngine = bpy.props.EnumProperty(
-        items=[
-            ('default', 'Default', '', '', 0),
-            ('unity', 'Unity', '', '', 1),
-            ('unreal', 'Unreal', '', '', 2)
-        ],
-        default='unity'
-        )
+    items=[
+        ('default', 'Default', '', '', 0),
+        ('unity', 'Unity', '', '', 1),
+        ('unreal', 'Unreal', '', '', 2)
+    ],
+    default='unity'
+)
 bpy.types.Scene.FBXExportSelected = bpy.props.BoolProperty(name="FBXExportSelected", default=False, description="Only export collection of currently selected object")
 bpy.types.Scene.FBXExportSM = bpy.props.BoolProperty(name="FBXExportSM", default=False, description="Each collection gets a unique FBX")
 bpy.types.Scene.FBXExportCentreMeshes = bpy.props.BoolProperty(name="FBXExportCentreMeshes", default=False, description="Center meshes before exporting. For merged meshes, any object in collection called \"origin\" will be used to set the origin before centering")
@@ -62,6 +65,7 @@ bpy.types.Object.FBXExportOffset = bpy.props.FloatVectorProperty(size=3)
 bpy.types.Action.Export = bpy.props.BoolProperty(name="Export")
 bpy.types.Scene.LastAnimSelected = bpy.props.StringProperty(name="Last Anim Selected")
 bpy.types.Scene.ExportStringReplace = bpy.props.StringProperty(name="what")
+
 
 def register():
     from bpy.utils import register_class

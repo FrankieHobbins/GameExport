@@ -53,6 +53,63 @@ class MakeList(bpy.types.Operator):
             for col in bpy.context.view_layer.layer_collection.children:
                 MakeList.list_of_collections_in_root.append(col.collection)
 
+    def make_export_list(self, vlc, bake):
+        export_list = []  # collection name and objects inside it
+        objects_to_delete = []
+        objects_to_not_delete = []
+        for col in MakeList.list_of_collections_in_root:
+            # validate
+            if not utils.is_valid(self, col, bake, [], False):
+                continue
+            # definitions
+            children_collections = []
+            export_objects = []
+            origin_object = False
+            # populate export collection with objects
+            utils.get_all_children_collections(self, col, children_collections)
+            children_collections.append(col)
+            for child in children_collections:
+                # validate children collectins
+                if utils.is_valid(self, child, False, bpy.context.selected_objects, self.selected):
+                    # dont delete existing empties
+                    for o in child.objects:
+                        if o.type == "EMPTY":
+                            objects_to_not_delete.append(o.name)
+                    # if merge is needed do merge & put the new objects into the list
+                    if utils.should_merge(self, child):
+                        merged_objects = merge_collection.merge_specified(self, child)
+                        for o in merged_objects:
+                            objects_to_delete.append(o.name)
+                            export_objects.append(o.name)
+                            o.select_set(True)
+                    # else put all objects into export list
+                    else:
+                        for object in child.objects:
+                            export_objects.append(object.name)
+            # dont export offset
+            export_objects = [i for i in export_objects if "offset" not in i.lower()]
+            export_list.append([col.name, export_objects])
+        # if export as individuals is set, want to break the list up so we dont use collections and each individual object has its own list entry
+        if bpy.context.scene.FBXExportSM:
+            individual_export_list = []
+            for i in export_list:
+                for ii in i[1]:
+                    individual_export_list.append([ii, [ii]])
+            export_list = individual_export_list
+        # if export selected is used, remove all objects that arn't selected
+        if self.selected:
+            selected_export_list = []
+            for i in export_list:
+                for ii in i[1]:
+                    if bpy.data.objects[ii] in bpy.context.selected_objects:
+                        selected_export_list.append([ii, [ii]])
+            export_list = selected_export_list
+        # dont delete empties that already existed
+        for i in objects_to_not_delete:
+            if i in objects_to_delete:
+                objects_to_delete.remove(i)
+        return export_list, objects_to_delete
+
     def merge_from_list(self):
         # duplicate collections in merge list and relink ready for export
         for col in MakeList.list_of_collections_to_merge:

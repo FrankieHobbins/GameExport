@@ -66,7 +66,6 @@ class MergeCollection(bpy.types.Operator):
         # select objects and join
         if len(obj_list) > 0:
             for ob in bpy.context.selected_objects:
-                print(ob)
                 ob.select_set(False)
             for o in obj_list:
                 o.select_set(True)
