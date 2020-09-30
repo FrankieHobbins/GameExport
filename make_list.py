@@ -53,6 +53,17 @@ class MakeList(bpy.types.Operator):
             for col in bpy.context.view_layer.layer_collection.children:
                 MakeList.list_of_collections_in_root.append(col.collection)
 
+        # if selected button is pressed make a list of selected object collections isntead
+        if self.selected:
+            new_list = []
+            for o in bpy.context.selected_objects:
+                for col in bpy.data.collections:
+                    for ob in col.objects:
+                        if o == ob:
+                            new_list.append(col)
+            new_list = list(dict.fromkeys(new_list))
+            MakeList.list_of_collections_in_root = new_list
+
     def make_export_list(self, vlc, bake):
         export_list = []  # collection name and objects inside it
         objects_to_delete = []
@@ -96,6 +107,7 @@ class MakeList(bpy.types.Operator):
                 for ii in i[1]:
                     individual_export_list.append([ii, [ii]])
             export_list = individual_export_list
+        """
         # if export selected is used, remove all objects that arn't selected
         if self.selected:
             selected_export_list = []
@@ -104,6 +116,7 @@ class MakeList(bpy.types.Operator):
                     if bpy.data.objects[ii] in bpy.context.selected_objects:
                         selected_export_list.append([ii, [ii]])
             export_list = selected_export_list
+        """
         # dont delete empties that already existed
         for i in objects_to_not_delete:
             if i in objects_to_delete:

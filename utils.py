@@ -16,8 +16,7 @@ class Utils(bpy.types.Operator):
             for child in col.children:
                 col_children.append(child)
                 if child.children:
-                    Utils.get_all_children_collections(
-                        self, child, col_children)
+                    Utils.get_all_children_collections(self, child, col_children)
         return col_children
 
     def cleanup_after_export(self):
@@ -64,7 +63,11 @@ class Utils(bpy.types.Operator):
         if len(vlc_list) > 0:
             if vlc_list[0].exclude:
                 return False
-        if selected and len([i for i in objects if i.name in col.objects]) == 0:
+        # if selected and len([i for i in objects if i.name in col.objects]) == 0:
+        #    return False
+        if "__MERGED_" in col.name:
+            return False
+        if "EXPORT" in col.name:
             return False
         return True
 

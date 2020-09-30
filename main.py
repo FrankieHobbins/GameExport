@@ -92,6 +92,8 @@ class Main(bpy.types.Operator):
         # here we link objects from the list to the export collision
         for i in list:
             o = bpy.data.objects[i]
+            if o == origin_object and o.type == "EMPTY":  # dont export origin object
+                continue
             export_col.objects.link(o)
             if bpy.context.scene.FBXExportCentreMeshes and not o.parent:
                 o = bpy.data.objects[i]
