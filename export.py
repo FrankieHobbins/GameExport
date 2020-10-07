@@ -125,10 +125,10 @@ class FBXExport(bpy.types.Operator):
     def export_fbx_settings_entire_scene(self):
         bake_anim_use_nla_strips = False
         bake_anim_use_all_actions = True
-        if bpy.context.preferences.addons['GameExport'].preferences['source_workflow'] and bpy.context.scene.FbxExportPath == "":
+        if bpy.context.preferences.addons['GameExport'].preferences.special_source_workflow and bpy.context.scene.FbxExportPath == "":
             bake_anim_use_nla_strips = True
             bake_anim_use_all_actions = False
-            ut.actionstoNLA(self, "_STA_")
+            utils.Utils.actionstoNLA(self, "_STA_")
         return {
             "use_selection": False,
             "use_active_collection": False,

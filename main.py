@@ -40,18 +40,17 @@ class Main(bpy.types.Operator):
             path = ut.setpath(self, bpy.path.basename(bpy.context.blend_data.filepath.replace(".blend", "")))
             self.call_export("high")
             self.call_export("low")
+        # for special up workflow
+        # TODO check this works properly on new installs        
+        elif bpy.context.preferences.addons['GameExport'].preferences.special_source_workflow and bpy.context.scene.FbxExportPath == "":
+            print("exporting standard - special source workflow")
+            path = ut.setpathspecialcases(self, "", False)
+            bpy.ops.export_scene.fbx(filepath=path, **export.FBXExport.export_fbx_settings_entire_scene(self))
         else:
             print("exporting standard")
             self.call_export("")
-        # for special up workflow
-        # TODO check this works properly on new installs
-        """
-        elif bpy.context.preferences.addons['GameExport'].preferences['special_source_workflow'] and bpy.context.scene.FbxExportPath == "":
-            print("exporting standard - special source workflow")
-            path = ut.setpathspecialcases(self, "", False)
-            bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_entire_scene(self))
         # standard export
-        """
+        
         make_list.MakeList.clean_up(self)
         return {"FINISHED"}
 

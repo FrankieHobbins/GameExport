@@ -134,9 +134,9 @@ class Utils(bpy.types.Operator):
             for prop in properties:
                 setattr(m_dst, prop, getattr(m_src, prop))
 
-    def setpath(self, col_name):        
+    def setpath(self, col_name):
         path = bpy.context.scene.FbxExportPath
-        path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences['user_path'])
+        path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences.user_path)
         prefix = bpy.context.scene.FbxExportPrefix
         if path == "":
             path = os.path.dirname(bpy.data.filepath) + "\\"
