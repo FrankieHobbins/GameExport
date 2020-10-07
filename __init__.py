@@ -4,7 +4,7 @@ bl_info = {
     "name": "Game Export",
     "description": "A Game Exporter",
     "author": "Frankie Hobbins",
-    "version": (1, 1, 2),
+    "version": (1, 1, 3),
     "blender": (2, 90, 0),
     "wiki_url": "my github url here",
     "category": "Import-Export"

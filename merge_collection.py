@@ -32,7 +32,6 @@ class MergeCollection(bpy.types.Operator):
         return col_copy.objects
 
     def merge(self, col):
-        # merge all objects in collcetion
         origin_object = False
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY' and o.instance_type == "COLLECTION"]
@@ -69,6 +68,7 @@ class MergeCollection(bpy.types.Operator):
                 ob.select_set(False)
             for o in obj_list:
                 o.select_set(True)
+            utils.Utils.addCustomNormalsToSelected(self)
             bpy.context.view_layer.objects.active = obj_list[0]
             MergeCollection.apply_modifiers(self, col)
             bpy.ops.object.join()

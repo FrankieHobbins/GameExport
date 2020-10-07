@@ -41,7 +41,7 @@ class Main(bpy.types.Operator):
             self.call_export("high")
             self.call_export("low")
         # for special up workflow
-        # TODO check this works properly on new installs        
+        # TODO check this works properly on new installs
         elif bpy.context.preferences.addons['GameExport'].preferences.special_source_workflow and bpy.context.scene.FbxExportPath == "":
             print("exporting standard - special source workflow")
             path = ut.setpathspecialcases(self, "", False)
@@ -60,7 +60,7 @@ class Main(bpy.types.Operator):
         # deselect everything
         for o in bpy.context.selected_objects:
             o.select_set(False)
-        # make a list of everything I want to export, keep a list of things I want to delete later
+        # make a list of everything I want to export, keep a list of things I want to delete later, merging gets done in here
         export_list, objects_to_delete = make_list.MakeList.make_export_list(self, vlc, bake)
         obj_and_pos_list = []
         # go though the export list and do the export

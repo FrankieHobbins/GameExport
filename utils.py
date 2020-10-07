@@ -106,6 +106,8 @@ class Utils(bpy.types.Operator):
                 new_col.objects.link(new_obj)
                 new_obj.matrix_world = obj.matrix_world
                 new_obj.rotation_euler = obj.rotation_euler
+                new_obj.data.use_auto_smooth = obj.data.use_auto_smooth
+                new_obj.data.auto_smooth_angle = obj.data.auto_smooth_angle
                 for vertexGroup in obj.vertex_groups:
                     new_obj.vertex_groups.new(name=vertexGroup.name)
                 Utils.copy_modifier(self, obj, new_obj)
@@ -193,3 +195,10 @@ class Utils(bpy.types.Operator):
             bpy.ops.mesh.uv_texture_remove()
             # set index 1 to be name
             uvl[1].name = name
+
+    def addCustomNormalsToSelected(self):
+        a = bpy.context.active_object
+        for i in bpy.context.selected_objects:
+            bpy.context.view_layer.objects.active = i
+            bpy.ops.mesh.customdata_custom_splitnormals_add()
+        bpy.context.view_layer.objects.active = a
