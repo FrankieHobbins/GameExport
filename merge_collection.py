@@ -68,9 +68,9 @@ class MergeCollection(bpy.types.Operator):
                 ob.select_set(False)
             for o in obj_list:
                 o.select_set(True)
-            utils.Utils.addCustomNormalsToSelected(self)
             bpy.context.view_layer.objects.active = obj_list[0]
             MergeCollection.apply_modifiers(self, col)
+            utils.Utils.addCustomNormalsToSelected(self)
             bpy.ops.object.join()
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             # fix to stop conflicts with new merged objects against old objects

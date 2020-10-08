@@ -4,7 +4,7 @@ bl_info = {
     "name": "Game Export",
     "description": "A Game Exporter",
     "author": "Frankie Hobbins",
-    "version": (1, 1, 3),
+    "version": (1, 1, 4),
     "blender": (2, 90, 0),
     "wiki_url": "my github url here",
     "category": "Import-Export"
@@ -35,6 +35,7 @@ classes = (
     make_list.MakeList,
     merge_collection.MergeCollection,
     ui.PANEL_PT_gameexport,
+    ui.PANEL_PT_gameexportsettings,
     ui.OpenFolder,
     ui.PANEL_PT_gameexport_addon_prefs,
     export.FBXExport

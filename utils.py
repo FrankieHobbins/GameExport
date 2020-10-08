@@ -50,6 +50,9 @@ class Utils(bpy.types.Operator):
         if bake == "high":
             if not any(col.name.lower().find(el) != -1 for el in high):
                 return False
+        if bake == "":
+            if "^" in col.name:
+                return False
         exclusion_list = ["*", "cutter"]  # TODO place in user prefs
         for i in exclusion_list:
             if i.lower() in col.name.lower():

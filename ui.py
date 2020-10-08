@@ -65,6 +65,16 @@ class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
         type=PathSwitcher
     )
 
+    big_button: bpy.props.EnumProperty(
+        name="Big Button",
+        items=[
+            ('Export', 'Export', '', '', 0),
+            ('Selected', 'Selected', '', '', 1),
+            ('Bake', 'Bake', '', '', 2)
+        ],
+        default='Export'
+    )
+
     def draw(self, context):
         layout = self.layout
         row = layout.row()
@@ -73,6 +83,8 @@ class PANEL_PT_gameexport_addon_prefs(bpy.types.AddonPreferences):
         row = layout.row()
         row.prop(self, 'user_path')
         row.prop(self, 'path_switch')
+        row.prop(self, 'big_button')
+        
 
 
 class PANEL_PT_gameexport(bpy.types.Panel):
@@ -85,24 +97,75 @@ class PANEL_PT_gameexport(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         row = layout.row()
-        props = layout.operator("gameexport.export", text="Export")
-        props.bake = False
-        props.selected = False
-        row = layout.row()
-        props = layout.operator("gameexport.export", text="Selected")
-        props.bake = False
-        props.selected = True
-        row = layout.row()
-        props = layout.operator("gameexport.export", text="Bake")
-        props.bake = True
-        props.selected = False
+        split = row.split(factor=0.8)
+        c = split.column()
+        row.scale_y = 1.5
+        if bpy.context.preferences.addons[__package__].preferences.big_button == "Export":
+            props = c.operator("gameexport.export", text="Export")
+            props.bake = False
+            props.selected = False
+
+            c = split.column()
+            c.operator('gameexport.openfolder', text='', icon= "FILE_FOLDER")
+            
+            row = layout.row()
+            props = row.operator("gameexport.export", text="Selected")
+            props.bake = False
+            props.selected = True
+            #row.scale_x = 2
+            props = row.operator("gameexport.export", text="Bake")
+            props.bake = True
+            props.selected = False
+        
+        elif bpy.context.preferences.addons[__package__].preferences.big_button == "Selected":
+            props = c.operator("gameexport.export", text="Selected")
+            props.bake = False
+            props.selected = True
+
+            c = split.column()
+            c.operator('gameexport.openfolder', text='', icon= "FILE_FOLDER")
+            
+            row = layout.row()
+            props = row.operator("gameexport.export", text="Export")
+            props.bake = False
+            props.selected = False
+            #row.scale_x = 2
+            props = row.operator("gameexport.export", text="Bake")
+            props.bake = True
+            props.selected = False
+
+        elif bpy.context.preferences.addons[__package__].preferences.big_button == "Bake":
+            props = c.operator("gameexport.export", text="Bake")
+            props.bake = True
+            props.selected = False
+
+            c = split.column()
+            c.operator('gameexport.openfolder', text='', icon= "FILE_FOLDER")
+            
+            row = layout.row()
+            props = row.operator("gameexport.export", text="Export")
+            props.bake = False
+            props.selected = False
+            #row.scale_x = 2
+            props = row.operator("gameexport.export", text="Selected")
+            props.bake = False
+            props.selected = True
+
+class PANEL_PT_gameexportsettings(bpy.types.Panel):
+    # bl_idname = "gameexport.ui_panel"
+    bl_label = "Settings"
+    bl_parent_id = "PANEL_PT_gameexport"
+    bl_category = "GameExport"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
         row = layout.row()
         row.prop(context.scene, "FbxExportPath", text="path")
         path = bpy.context.scene.FbxExportPath
         path = path.replace("$path$", bpy.context.preferences.addons[__package__].preferences.user_path)
-        layout.label(text="export to:  " + path)
-        row = layout.row()
-        row.operator('gameexport.openfolder', text='Open Path')
         row = layout.row()
         row.prop(context.scene, "FbxExportPrefix", text="prefix")
         row = layout.row()
@@ -112,7 +175,7 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FBXFixUnityRotation", text="Fix Unity Rotation")
         row = layout.row()
-        row.prop(context.scene, "FBXExportSM", text="Individual Objets")
+        row.prop(context.scene, "FBXExportSM", text="Individual Objects")
         row = layout.row()
         row.prop(context.scene, "FBXExportCentreMeshes", text="Centred")
         row = layout.row()
@@ -137,7 +200,7 @@ class PANEL_PT_gameexport(bpy.types.Panel):
                 bpy.types.Scene.LastAnimSelected = bpy.data.actions[bpy.context.object.action_list_index]  # lets you selected with the action dropdown from action editor      
             except:
                 pass
-
+        
 
 class OpenFolder(bpy.types.Operator):
     # not currently used
