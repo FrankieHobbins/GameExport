@@ -44,25 +44,21 @@ class MakeList(bpy.types.Operator):
         # find collections that need to be merged and move to new list
         for col in list(MakeList.list_of_all_viewlayers):
             if MakeList.merge_character in col[1].name:
-                MakeList.list_of_collections_to_merge.append(col[1]) # TODO: is this actually used?
+                MakeList.list_of_collections_to_merge.append(col[1])  # TODO: is this actually used?
 
         # make list of all collections in root
-        if bpy.context.scene.FBXExportSelected:
-            MakeList.list_of_collections_in_root.append(bpy.context.collection)
-        else:
-            for col in bpy.context.view_layer.layer_collection.children:
-                MakeList.list_of_collections_in_root.append(col.collection)
+        for col in bpy.context.view_layer.layer_collection.children:
+            MakeList.list_of_collections_in_root.append(col.collection)
 
         # if selected button is pressed make a list of selected object collections isntead
         if self.selected:
-            new_list = []
-            for o in bpy.context.selected_objects:
-                for col in bpy.data.collections:
-                    for ob in col.objects:
-                        if o == ob:
-                            new_list.append(col)
-            new_list = list(dict.fromkeys(new_list))
-            MakeList.list_of_collections_in_root = new_list
+            # get set (set is like a list but can only contain each entry once) of collections with selected objects
+            new_list = {c for i in bpy.context.selected_objects for c in bpy.data.collections for o in c.objects if i == o}
+            # get set of children collections inside selected objects TODO: make recusive
+            new_list_1 = {j for i in new_list for j in i.children}
+            # clean out selected children from main first list to avoid getting exported twice
+            new_list_2 = {i for i in new_list if i not in new_list_1}
+            MakeList.list_of_collections_in_root = new_list_2
 
     def make_export_list(self, vlc, bake):
         export_list = []  # collection name and objects inside it
@@ -107,16 +103,6 @@ class MakeList(bpy.types.Operator):
                 for ii in i[1]:
                     individual_export_list.append([ii, [ii]])
             export_list = individual_export_list
-        """
-        # if export selected is used, remove all objects that arn't selected
-        if self.selected:
-            selected_export_list = []
-            for i in export_list:
-                for ii in i[1]:
-                    if bpy.data.objects[ii] in bpy.context.selected_objects:
-                        selected_export_list.append([ii, [ii]])
-            export_list = selected_export_list
-        """
         # dont delete empties that already existed
         for i in objects_to_not_delete:
             if i in objects_to_delete:
