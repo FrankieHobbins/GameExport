@@ -202,6 +202,9 @@ class Utils(bpy.types.Operator):
     def addCustomNormalsToSelected(self):
         a = bpy.context.active_object
         for i in bpy.context.selected_objects:
-            bpy.context.view_layer.objects.active = i
-            bpy.ops.mesh.customdata_custom_splitnormals_add()
+            try:
+                bpy.context.view_layer.objects.active = i
+                bpy.ops.mesh.customdata_custom_splitnormals_add()
+            except:
+                pass
         bpy.context.view_layer.objects.active = a
