@@ -67,9 +67,7 @@ class MergeCollection(bpy.types.Operator):
         for o in new_list:
             if o.type == "EMPTY":
                 obj_list.remove(o)
-            if "COL_BOX" in o.name or "COL_MESH" in o.name or "OUTLINE" in o.name:  # TODO: add to prefs
-                obj_list.remove(o)
-            if "!" in o.name:  # TODO: add to prefs
+            if "COL_BOX" in o.name or "COL_MESH" in o.name or "OUTLINE" in o.name or "!" in o.name: # TODO: add to prefs
                 obj_list.remove(o)
         # select objects and join
         if len(obj_list) > 0:

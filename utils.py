@@ -179,7 +179,6 @@ class Utils(bpy.types.Operator):
 
         for action in bpy.data.actions:
             if filter in action.name:
-                print(action)
                 bpy.context.object.animation_data.nla_tracks.new()
                 bpy.context.object.animation_data.nla_tracks[(len(bpy.context.object.animation_data.nla_tracks)-1)].name = action.name
                 bpy.context.object.animation_data.nla_tracks[(len(bpy.context.object.animation_data.nla_tracks)-1)].strips.new(action.name,0,action)
