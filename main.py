@@ -81,7 +81,7 @@ class Main(bpy.types.Operator):
                 origin_object = bpy.data.objects[object]
         if origin_object:
             for object in list:
-                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" or "COL_MESH" in object or "OUTLINE" in object or "!" in object:
+                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" in object or "COL_MESH" in object or "OUTLINE" in object or "!" in object:                    
                     if "origin" not in object.lower():
                         if not bpy.data.objects[object].parent:
                             o = bpy.data.objects[object]
@@ -100,8 +100,12 @@ class Main(bpy.types.Operator):
                 o_pos = o.location.copy()
                 obj_and_pos_list.append([o, o_pos])
                 o.location = (0, 0, 0)
+                print(i)
                 if o.FBXExportOffset:
+                    print("has export offset")
                     o.location = o.FBXExportOffset
+                else:
+                    print("hasnt got one!-----------------------------------")
             if bpy.context.scene.FBXFlipUVIndex:
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
