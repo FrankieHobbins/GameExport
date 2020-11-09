@@ -81,10 +81,11 @@ class Main(bpy.types.Operator):
                 origin_object = bpy.data.objects[object]
         if origin_object:
             for object in list:
-                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" in object or "OUTLINE" in object:
+                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" or "COL_MESH" in object or "OUTLINE" in object or "!" in object:
                     if "origin" not in object.lower():
                         if not bpy.data.objects[object].parent:
                             o = bpy.data.objects[object]
+                            o.parent = None
                             o.FBXExportOffset = (o.location[0] - origin_object.location[0],
                                                  o.location[1] - origin_object.location[1],
                                                  o.location[2] - origin_object.location[2])

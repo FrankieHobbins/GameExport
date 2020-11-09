@@ -44,6 +44,7 @@ class MergeCollection(bpy.types.Operator):
                 for o in empty_list:
                     o.select_set(True)
                 bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=True)
+                # bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=False)
                 for ob in bpy.context.selected_objects:
                     if ob.type == "MESH":
                         ob.data = ob.data.copy()  # make objects single user
@@ -55,12 +56,20 @@ class MergeCollection(bpy.types.Operator):
         for o in col.objects:
             if "origin" in o.name.lower():
                 origin_object = o.location.copy()
+        # see if parent has an origin
+        if origin_object is False:
+            parent = utils.Utils.find_parent(self, col)
+            for o in parent.objects:
+                if "origin" in o.name.lower():
+                    origin_object = o.location.copy()
         # remove objects from list we dont want to merge
         new_list = obj_list.copy()
         for o in new_list:
             if o.type == "EMPTY":
                 obj_list.remove(o)
-            if "COL_BOX" in o.name or "OUTLINE" in o.name:  # TODO: add to prefs
+            if "COL_BOX" in o.name or "COL_MESH" in o.name or "OUTLINE" in o.name:  # TODO: add to prefs
+                obj_list.remove(o)
+            if "!" in o.name:  # TODO: add to prefs
                 obj_list.remove(o)
         # select objects and join
         if len(obj_list) > 0:
