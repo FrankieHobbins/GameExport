@@ -12,7 +12,7 @@ class MakeList(bpy.types.Operator):
     bl_description = "A demo operator"
     bl_options = {"UNDO"}
 
-    list_of_collections_in_root = []
+    list_of_collections_to_export = []
     list_of_collections = []
     list_of_all_viewlayers = []
     list_of_collections_to_merge = []
@@ -23,7 +23,7 @@ class MakeList(bpy.types.Operator):
 
     def reset(self):
         # make sure clean at start
-        MakeList.list_of_collections_in_root = []
+        MakeList.list_of_collections_to_export = []
         MakeList.list_of_collections = []
         MakeList.list_of_all_viewlayers = []
         MakeList.list_of_collections_to_merge = []
@@ -40,33 +40,33 @@ class MakeList(bpy.types.Operator):
     def make_list(self):
         # make collated list of all view layers and associated collection
         utils.list_all_layercollections_and_collections(self, MakeList.list_of_all_viewlayers, bpy.context.view_layer.layer_collection)
-
         # find collections that need to be merged and move to new list
         for col in list(MakeList.list_of_all_viewlayers):
             if MakeList.merge_character in col[1].name:
                 MakeList.list_of_collections_to_merge.append(col[1])  # TODO: is this actually used?
-
         # make list of all collections in root
         for col in bpy.context.view_layer.layer_collection.children:
-            MakeList.list_of_collections_in_root.append(col.collection)
-
+            MakeList.list_of_collections_to_export.append(col.collection)
         # if selected button is pressed make a list of selected object collections isntead
         if self.selected:
-            # get set (set is like a list but can only contain each entry once) of collections with selected objects
+            # create set of collections with selected objects (set is like a list but can only contain each entry once
             new_list = {c for i in bpy.context.selected_objects for c in bpy.data.collections for o in c.objects if i == o}
-            # get set of children collections inside selected objects TODO: make recusive
+            # create set of children collections inside selected objects TODO: make recusive
             new_list_1 = {j for i in new_list for j in i.children}
             # clean out selected children from main first list to avoid getting exported twice
             new_list_2 = {i for i in new_list if i not in new_list_1}
-            MakeList.list_of_collections_in_root = new_list_2
+            # find parent collections
+            new_list_3 = {utils.find_parent_recursive(self, i) for i in new_list_2}
+            MakeList.list_of_collections_to_export = new_list_3
 
     def make_export_list(self, vlc, bake):
         export_list = []  # collection name and objects inside it
         objects_to_delete = []
-        objects_to_not_delete = []
-        for col in MakeList.list_of_collections_in_root:
+        objects_to_not_delete = []        
+        for col in MakeList.list_of_collections_to_export:
+            print(col)
             # validate
-            if not utils.is_valid(self, col, bake, [], False):
+            if not utils.is_valid(self, col, bake):
                 continue
             # definitions
             children_collections = []
@@ -77,7 +77,7 @@ class MakeList(bpy.types.Operator):
             children_collections.append(col)
             for child in children_collections:
                 # validate children collectins
-                if utils.is_valid(self, child, False, bpy.context.selected_objects, self.selected):
+                if utils.is_valid(self, child, False):
                     # dont delete existing empties
                     for o in child.objects:
                         if o.type == "EMPTY":

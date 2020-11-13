@@ -118,7 +118,7 @@ class PANEL_PT_gameexportsettings(bpy.types.Panel):
         row.prop(context.scene, "FbxExportPath", text="path")
         path = bpy.context.scene.FbxExportPath
         path = path.replace("$path$", bpy.context.preferences.addons[__package__].preferences.user_path)
-        layout.label(text= path)
+        layout.label(text=path)
         row = layout.row()
         row.prop(context.scene, "FbxExportPrefix", text="prefix")
         row = layout.row()

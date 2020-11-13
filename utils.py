@@ -32,6 +32,13 @@ class Utils(bpy.types.Operator):
                         return c
         return bpy.context.scene.collection
 
+    def find_parent_recursive(self, col):
+        if col.name in bpy.context.view_layer.layer_collection.children:
+            return col
+        for c in bpy.data.collections:
+            if col.name in c.children:
+                return(Utils.find_parent_recursive(self, c))
+
     def find_view_layer_collection(self, col, col_layer, col_list):
         if col_layer.collection == col:
             col_list.append(col_layer)
@@ -41,7 +48,7 @@ class Utils(bpy.types.Operator):
         else:
             return col_list
 
-    def is_valid(self, col, bake, objects, selected):
+    def is_valid(self, col, bake):
         low = ["low_", "lo_", "_low", "_lo"]
         high = ["high_", "hi_", "_high", "_hi"]
         if bake == "low":
@@ -66,8 +73,6 @@ class Utils(bpy.types.Operator):
         if len(vlc_list) > 0:
             if vlc_list[0].exclude:
                 return False
-        # if selected and len([i for i in objects if i.name in col.objects]) == 0:
-        #    return False
         if "__MERGED_" in col.name:
             return False
         if "EXPORT" in col.name:
