@@ -4,7 +4,7 @@ bl_info = {
     "name": "Game Export",
     "description": "A Game Exporter",
     "author": "Frankie Hobbins",
-    "version": (1, 1, 5),
+    "version": (1, 1, 6),
     "blender": (2, 90, 0),
     "wiki_url": "my github url here",
     "category": "Import-Export"
@@ -41,7 +41,10 @@ classes = (
     export.FBXExport
 )
 
-bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", default="", subtype="DIR_PATH", description="Path to export to")
+def update_path(self, context):
+    self.FbxExportPath = self.FbxExportPath.replace(bpy.context.preferences.addons[__package__].preferences.user_path, "$path$")
+
+bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", default="", subtype="DIR_PATH", description="Path to export to", update=update_path)
 bpy.types.Scene.FbxExportPrefix = bpy.props.StringProperty(name="FbxExportPrefix", description="Prefix to put before each fbx")
 bpy.types.Scene.FbxExportScale = bpy.props.FloatProperty(name="FbxExportScale", default=1.0, description="Fbx Export Scale")
 bpy.types.Scene.FbxExportEngine = bpy.props.EnumProperty(
