@@ -13,6 +13,7 @@ class MergeCollection(bpy.types.Operator):
         return {"FINISHED"}
 
     def merge_active(self):
+        # called by this class and can be run alone
         col = bpy.context.view_layer.active_layer_collection.collection
         name = MergeCollection.rename_merge_collection(self, col.name)
         col_copy = utils.Utils.duplicate_collection(self, col)
@@ -23,16 +24,17 @@ class MergeCollection(bpy.types.Operator):
         self.merge(col_copy)
 
     def merge_specified(self, col):
+        # called by game export script
         # duplicate collection and rename
         col_copy = utils.Utils.duplicate_collection(self, col)
         col_copy.name = MergeCollection.rename_merge_collection(self, col.name)
         bpy.context.view_layer.layer_collection.collection.children.link(col_copy)
         # merge all objects into one
-        MergeCollection.merge(self, col_copy)
+        MergeCollection.merge(self, col_copy, utils.Utils.find_origin(self, col))
         return col_copy.objects
 
-    def merge(self, col):
-        origin_object = False
+    def merge(self, col, origin_object):
+        # xxx origin_object = False
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY' and o.instance_type == "COLLECTION"]
         for o in bpy.data.objects:
@@ -52,22 +54,12 @@ class MergeCollection(bpy.types.Operator):
             # remove surplus empties
             for o in empty_list:
                 bpy.data.objects.remove(o)
-        # find origin
-        for o in col.objects:
-            if "origin" in o.name.lower():
-                origin_object = o.location.copy()
-        # see if parent has an origin
-        if origin_object is False:
-            parent = utils.Utils.find_parent(self, col)
-            for o in parent.objects:
-                if "origin" in o.name.lower():
-                    origin_object = o.location.copy()
         # remove objects from list we dont want to merge
         new_list = obj_list.copy()
         for o in new_list:
             if o.type == "EMPTY":
                 obj_list.remove(o)
-            if "COL_BOX" in o.name or "COL_MESH" in o.name or "OUTLINE" in o.name or "!" in o.name: # TODO: add to prefs
+            if "COL_BOX" in o.name or "COL_MESH" in o.name or "OUTLINE" in o.name or "!" in o.name:  # TODO: add to prefs
                 obj_list.remove(o)
         # select objects and join
         if len(obj_list) > 0:

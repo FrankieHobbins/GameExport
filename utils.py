@@ -36,7 +36,7 @@ class Utils(bpy.types.Operator):
         if col.name in bpy.context.view_layer.layer_collection.children:
             return col
         for c in bpy.data.collections:
-            if col.name in c.children:
+            if col.name in bpy.data.collections.children:
                 return(Utils.find_parent_recursive(self, c))
 
     def find_view_layer_collection(self, col, col_layer, col_list):
@@ -47,6 +47,35 @@ class Utils(bpy.types.Operator):
                 Utils.find_view_layer_collection(self, col, child, col_list)
         else:
             return col_list
+
+    def find_origin(self, col):
+        origin_object = False
+        print(f"-- finding origin for col {col}")
+        # see if origin_object exists in current collection
+        for o in col.objects:
+            if "origin" in o.name.lower():
+                origin_object = o.location.copy()
+        # see if origin_object exists in parent collections
+        if not origin_object:
+            origin_object = Utils.find_origin_recursive(self, col)
+        print(origin_object)
+        print("finishing")
+        return origin_object
+
+    def find_origin_recursive(self, col):
+        parent = Utils.find_parent(self, col)
+        print(parent)
+        origin_object = False
+        for o in parent.objects:
+            if "origin" in o.name.lower():
+                origin_object = o.location.copy()
+                print("has found")
+                return origin_object
+        if not origin_object:
+            if parent == bpy.context.scene.collection:
+                return origin_object
+            return Utils.find_origin_recursive(self, parent)
+        return origin_object
 
     def is_valid(self, col, bake):
         low = ["low_", "lo_", "_low", "_lo"]

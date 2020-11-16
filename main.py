@@ -76,12 +76,13 @@ class Main(bpy.types.Operator):
 
     def prepare_objects_for_export(self, list, export_col, obj_and_pos_list):
         origin_object = False
+        # find the origin object and calculte the offset
         for object in list:
             if "origin" in object.lower():
                 origin_object = bpy.data.objects[object]
         if origin_object:
             for object in list:
-                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" in object or "COL_MESH" in object or "OUTLINE" in object or "!" in object:                    
+                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" in object or "COL_MESH" in object or "OUTLINE" in object or "!" in object:
                     if "origin" not in object.lower():
                         if not bpy.data.objects[object].parent:
                             o = bpy.data.objects[object]
