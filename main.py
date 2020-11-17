@@ -122,9 +122,10 @@ class Main(bpy.types.Operator):
             for i in list:
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
-        if not bpy.context.scene.FBXLeaveExport:
-            export_col.name = "Collection To Delete"
-            bpy.data.collections.remove(export_col)
+        if bpy.context.scene.FBXLeaveExport or bpy.context.scene.FBXProcessWithoutExport:
+            return
+        export_col.name = "Collection To Delete"
+        bpy.data.collections.remove(export_col)
 
     def create_export_col(self, vlc):
         # make new collection to export to & link to scene
@@ -144,7 +145,7 @@ class Main(bpy.types.Operator):
         return vlc, active_vlc, active_object, selected_objects
 
     def cleanup_merged(self, objects_to_delete):
-        if bpy.context.scene.FBXLeaveExport:
+        if bpy.context.scene.FBXLeaveExport or bpy.context.scene.FBXProcessWithoutExport:
             return
         for ob in objects_to_delete:
             bpy.data.objects.remove(bpy.data.objects[ob])

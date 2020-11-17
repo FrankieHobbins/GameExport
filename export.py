@@ -11,6 +11,8 @@ class FBXExport(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def export(self, path, export_col):
+        if not bpy.context.scene.FBXProcessWithoutExport:
+            return
         if (bpy.context.scene.FbxExportEngine == 'default'):  # TODO make work good
             bpy.ops.export_scene.fbx(filepath=path, **FBXExport.export_fbx_settings_unity(self))
         elif (bpy.context.scene.FbxExportEngine == 'unity'):

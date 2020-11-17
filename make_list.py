@@ -62,7 +62,7 @@ class MakeList(bpy.types.Operator):
     def make_export_list(self, vlc, bake):
         export_list = []  # collection name and objects inside it
         objects_to_delete = []
-        objects_to_not_delete = []        
+        objects_to_not_delete = []
         for col in MakeList.list_of_collections_to_export:
             print(col)
             # validate

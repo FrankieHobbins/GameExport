@@ -121,6 +121,11 @@ class PANEL_PT_gameexporttools(bpy.types.Panel):
         row = layout.row()
         props = row.operator("gameexport.vertex_group_assign", text="Add Vertex Group")
         row.prop(context.scene, "NewVertexGroupName", text="")
+        row = layout.row()
+        props = row.operator("gameexport.vertex_group_remove", text="Remove Vertex Groups")
+        row.prop(context.scene, "NewVertexGroupRemoveName", text="")
+        row = layout.row()
+        props = row.operator("gameexport.process_without_export", text="Process Selected Without Export")
 
 
 class PANEL_PT_gameexportsettings(bpy.types.Panel):
