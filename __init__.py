@@ -26,6 +26,7 @@ from . import utils
 from . import main
 from . import ui
 from . import export
+from . import tools
 
 classes = (
     ui.ACTIONS_UL_List,
@@ -36,9 +37,12 @@ classes = (
     merge_collection.MergeCollection,
     ui.PANEL_PT_gameexport,
     ui.PANEL_PT_gameexportsettings,
+    ui.PANEL_PT_gameexporttools,
     ui.OpenFolder,
     ui.PANEL_PT_gameexport_addon_prefs,
-    export.FBXExport
+    export.FBXExport,
+    tools.Tools,
+    tools.VetexGroupAssign
 )
 
 def update_path(self, context):
@@ -69,6 +73,8 @@ bpy.types.Object.FBXExportOffset = bpy.props.FloatVectorProperty(size=3)
 bpy.types.Action.Export = bpy.props.BoolProperty(name="Export")
 bpy.types.Scene.LastAnimSelected = bpy.props.StringProperty(name="Last Anim Selected")
 bpy.types.Scene.ExportStringReplace = bpy.props.StringProperty(name="what")
+# tools
+bpy.types.Scene.NewVertexGroupName = bpy.props.StringProperty(name="Vertex Group Name", default="new vertex group", description="Path to export to")
 
 
 def register():

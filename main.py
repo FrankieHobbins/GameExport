@@ -103,13 +103,17 @@ class Main(bpy.types.Operator):
                 o.location = (0, 0, 0)
                 print(i)
                 if o.FBXExportOffset:
-                    print("has export offset")
+                    print(f"{o} has export offset")
                     o.location = o.FBXExportOffset
                 else:
-                    print("hasnt got one!-----------------------------------")
+                    print(f"{o} hasnt got an export offset!")
             if bpy.context.scene.FBXFlipUVIndex:
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
+        lod_collection = [i for i in bpy.data.collections if "LODS" in i.name]
+        if len(lod_collection):
+            objects = [i for i in export_col.objects if i.type == "MESH"]
+            utils.Utils.lod(self, objects, lod_collection[0], export_col)
 
     def cleanup(self, list, export_col, obj_and_pos_list):
         for ii in obj_and_pos_list:

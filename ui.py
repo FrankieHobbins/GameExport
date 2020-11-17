@@ -1,8 +1,10 @@
 import bpy
 from . import utils
+from . import tools
 from bpy.props import (BoolProperty, StringProperty, CollectionProperty)
 
 utils = utils.Utils
+tools == tools.Tools
 
 
 class PathSwitcher(bpy.types.PropertyGroup):
@@ -101,6 +103,24 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         props = row.operator("gameexport.export", text="Bake")
         props.bake = True
         props.selected = False
+
+
+class PANEL_PT_gameexporttools(bpy.types.Panel):
+    # bl_idname = "gameexport.ui_panel"
+    bl_label = "Tools"
+    bl_parent_id = "PANEL_PT_gameexport"
+    bl_category = "GameExport"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+        row = layout.row()
+        # row.label(text="Add Vertex Group to Selected Objects")
+        row = layout.row()
+        props = row.operator("gameexport.vertex_group_assign", text="Add Vertex Group")
+        row.prop(context.scene, "NewVertexGroupName", text="")
 
 
 class PANEL_PT_gameexportsettings(bpy.types.Panel):

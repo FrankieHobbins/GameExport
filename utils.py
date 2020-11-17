@@ -48,6 +48,11 @@ class Utils(bpy.types.Operator):
         else:
             return col_list
 
+    def find_collection(self, obj):
+        for c in bpy.data.collections:            
+            if obj in list(c.objects):
+                return c
+
     def find_origin(self, col):
         origin_object = False
         print(f"-- finding origin for col {col}")
@@ -64,12 +69,10 @@ class Utils(bpy.types.Operator):
 
     def find_origin_recursive(self, col):
         parent = Utils.find_parent(self, col)
-        print(parent)
         origin_object = False
         for o in parent.objects:
             if "origin" in o.name.lower():
                 origin_object = o.location.copy()
-                print("has found")
                 return origin_object
         if not origin_object:
             if parent == bpy.context.scene.collection:
@@ -241,3 +244,27 @@ class Utils(bpy.types.Operator):
             except:
                 pass
         bpy.context.view_layer.objects.active = a
+
+    def duplicate(self, name, object, col):
+        data = object.data
+        new_obj = bpy.data.objects.new(name, data)
+        # col = Utils.find_collection(self, object)
+        col.objects.link(new_obj)
+        new_obj.matrix_world = object.matrix_world
+        for vertexGroup in object.vertex_groups:
+            new_obj.vertex_groups.new(name=vertexGroup.name)
+        return new_obj
+
+    def lod(self, objects_to_lod, lod_collection, export_collection):
+        # objects_to_lod = bpy.context.selected_objects
+        remove = False
+        for lod_obj in objects_to_lod:            
+            for element in lod_obj.vertex_groups:
+                objects = [i for i in lod_collection.objects if element.name in i.name]
+                for o in objects:
+                    remove = True
+                    new_obj = Utils.duplicate(self, o.name, lod_obj, export_collection)
+                    Utils.copy_modifier(self, bpy.data.objects[o.name], new_obj)
+        if remove:
+            export_collection.objects.unlink(lod_obj)
+            
