@@ -64,7 +64,6 @@ class MakeList(bpy.types.Operator):
         objects_to_delete = []
         objects_to_not_delete = []
         for col in MakeList.list_of_collections_to_export:
-            print(col)
             # validate
             if not utils.is_valid(self, col, bake):
                 continue

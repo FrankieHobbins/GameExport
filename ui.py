@@ -93,12 +93,14 @@ class PANEL_PT_gameexport(bpy.types.Panel):
         props = c.operator("gameexport.export", text="Export")
         props.bake = False
         props.selected = False
+        props.process_without_export = False
         c = split.column()
         c.operator('gameexport.openfolder', text='', icon="FILE_FOLDER")
         row = layout.row()
         props = row.operator("gameexport.export", text="Selected")
         props.bake = False
         props.selected = True
+        props.process_without_export = False
         # row.scale_x = 2
         props = row.operator("gameexport.export", text="Bake")
         props.bake = True
@@ -125,7 +127,12 @@ class PANEL_PT_gameexporttools(bpy.types.Panel):
         props = row.operator("gameexport.vertex_group_remove", text="Remove Vertex Groups")
         row.prop(context.scene, "NewVertexGroupRemoveName", text="")
         row = layout.row()
-        props = row.operator("gameexport.process_without_export", text="Process Selected Without Export")
+        props = row.operator("gameexport.copy_vertex_groups", text="Link object with vertex Groups")
+        row = layout.row()
+        props = row.operator("gameexport.export", text="Process Selected Without Export")
+        props.bake = False
+        props.selected = True
+        props.process_without_export = True
 
 
 class PANEL_PT_gameexportsettings(bpy.types.Panel):

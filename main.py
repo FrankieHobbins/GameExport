@@ -25,6 +25,11 @@ class Main(bpy.types.Operator):
         default=False
     )
 
+    process_without_export: bpy.props.BoolProperty(
+        name="process_without_export",
+        default=False
+    )
+
     fbx_prefix: bpy.props.StringProperty(
         name="fbx_prefix",
         default=""
@@ -100,13 +105,9 @@ class Main(bpy.types.Operator):
                 o = bpy.data.objects[i]
                 o_pos = o.location.copy()
                 obj_and_pos_list.append([o, o_pos])
-                o.location = (0, 0, 0)
-                print(i)
+                o.location = (0, 0, 0)                
                 if o.FBXExportOffset:
-                    print(f"{o} has export offset")
                     o.location = o.FBXExportOffset
-                else:
-                    print(f"{o} hasnt got an export offset!")
             if bpy.context.scene.FBXFlipUVIndex:
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
@@ -122,7 +123,7 @@ class Main(bpy.types.Operator):
             for i in list:
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
-        if bpy.context.scene.FBXLeaveExport or bpy.context.scene.FBXProcessWithoutExport:
+        if bpy.context.scene.FBXLeaveExport or self.process_without_export:
             return
         export_col.name = "Collection To Delete"
         bpy.data.collections.remove(export_col)
@@ -145,10 +146,11 @@ class Main(bpy.types.Operator):
         return vlc, active_vlc, active_object, selected_objects
 
     def cleanup_merged(self, objects_to_delete):
-        if bpy.context.scene.FBXLeaveExport or bpy.context.scene.FBXProcessWithoutExport:
+        if bpy.context.scene.FBXLeaveExport:
             return
         for ob in objects_to_delete:
-            bpy.data.objects.remove(bpy.data.objects[ob])
+            if not self.process_without_export:
+                bpy.data.objects.remove(bpy.data.objects[ob])
         for o in bpy.data.objects:
             if "_CONFLICT__" in o.name:
                 o.name = o.name.replace("_CONFLICT__", "")
