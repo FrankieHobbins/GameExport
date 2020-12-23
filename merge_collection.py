@@ -33,33 +33,49 @@ class MergeCollection(bpy.types.Operator):
         MergeCollection.merge(self, col_copy, utils.Utils.find_origin(self, col))
         return col_copy.objects
 
-    def merge(self, col, origin_object):
+    def merge(self, col, origin_object):        
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY' and o.instance_type == "COLLECTION"]
+        instance_list = [o for o in col.objects if o.instance_type != "NONE"]
+        instance_object_children_list = []
+        remove_list = []
         for o in bpy.data.objects:
             o.select_set(False)
-        # deal with empty objects that could have be instances of meshes
+        # deal with instanced objects, collections, faces and verts
         if bpy.context.scene.FBXFreezeInstances:
-            if len(empty_list) > 0:
-                bpy.context.view_layer.objects.active = empty_list[0]
-                for o in empty_list:
+            if len(instance_list) > 0:
+                bpy.context.view_layer.objects.active = instance_list[0]
+                for o in instance_list:
                     o.select_set(True)
+                    instance_object_children_list = [i for i in o.children]
                 bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=True)
-                # bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=False)
                 for ob in bpy.context.selected_objects:
+                    print(ob)
                     if ob.type == "MESH":
                         ob.data = ob.data.copy()  # make objects single user
                 obj_list += bpy.context.selected_editable_objects
             # remove surplus empties
             for o in empty_list:
                 bpy.data.objects.remove(o)
-        # remove objects from list we dont want to merge
         new_list = obj_list.copy()
+        # deal with objects not to merge or export
         for o in new_list:
             if o.type == "EMPTY":
                 obj_list.remove(o)
             if "COL_BOX" in o.name or "COL_MESH" in o.name or "OUTLINE" in o.name or "!" in o.name:  # TODO: add to prefs
                 obj_list.remove(o)
+            if not o.show_instancer_for_viewport:
+                remove_list.append(o.name)
+                obj_list.remove(o)
+            if o in instance_object_children_list:
+                print(f"adding {o} to remove list")
+                remove_list.append(o.name)
+                obj_list.remove(o)
+        # delete now
+        for o in remove_list:
+            print(f" removing {o}")
+            bpy.data.objects.remove(bpy.data.objects[o])
+
         # select objects and join
         if len(obj_list) > 0:
             for ob in bpy.context.selected_objects:

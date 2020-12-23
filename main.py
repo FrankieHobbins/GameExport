@@ -39,7 +39,13 @@ class Main(bpy.types.Operator):
         # make lists
         make_list.MakeList.reset(self)
         make_list.MakeList.make_list(self)
-        bpy.ops.object.mode_set(mode='OBJECT')
+        try:
+            bpy.ops.object.mode_set(mode='OBJECT')
+        except:
+            if self.selected:
+                print("nothing selected so not exporting anything")
+                return {"FINISHED"}
+            
         # for baking
         if self.bake:
             print("exporting bake")
@@ -105,7 +111,7 @@ class Main(bpy.types.Operator):
                 o = bpy.data.objects[i]
                 o_pos = o.location.copy()
                 obj_and_pos_list.append([o, o_pos])
-                o.location = (0, 0, 0)                
+                o.location = (0, 0, 0)
                 if o.FBXExportOffset:
                     o.location = o.FBXExportOffset
             if bpy.context.scene.FBXFlipUVIndex:

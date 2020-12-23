@@ -137,19 +137,17 @@ class Utils(bpy.types.Operator):
 
     def duplicate_objects(self, old_col, new_col):
         merge_prefix = "_M_"  # TODO make global
+        child_parent_list = []
         for obj in old_col.objects:
+            if obj.parent and obj.parent.name in old_col.objects:
+                child_parent_list.append([merge_prefix + obj.name, merge_prefix + obj.parent.name])
             if obj.type == "MESH":
-                obj_data = obj.data.copy()
-                new_obj = bpy.data.objects.new(merge_prefix + obj.name, obj_data)
+                new_obj = obj.copy()
+                new_obj.name = merge_prefix + obj.name
+                new_obj.data = obj.data.copy()
+                new_obj.parent = obj.parent
                 new_col.objects.link(new_obj)
-                new_obj.matrix_world = obj.matrix_world
-                new_obj.rotation_euler = obj.rotation_euler
-                new_obj.data.use_auto_smooth = obj.data.use_auto_smooth
-                new_obj.data.auto_smooth_angle = obj.data.auto_smooth_angle
-                for vertexGroup in obj.vertex_groups:
-                    new_obj.vertex_groups.new(name=vertexGroup.name)
-                Utils.copy_modifier(self, obj, new_obj)
-            elif obj.type == "EMPTY" and bpy.context.scene.FBXFreezeInstances and obj.instance_type == "COLLECTION":
+            elif obj.instance_type == "COLLECTION":
                 new_empty = bpy.data.objects.new("empty", None)
                 new_empty.name = obj.name + "_DUPLICATE"
                 new_col.objects.link(new_empty)
@@ -159,6 +157,13 @@ class Utils(bpy.types.Operator):
                 new_empty.instance_collection = obj.instance_collection
             elif obj.type == "EMPTY":  # and "origin" in obj.name.lower():
                 new_col.objects.link(obj)
+        # reparent
+        for item in child_parent_list:
+            bpy.data.objects[item[0]].parent = bpy.data.objects[item[1]]
+            bpy.data.objects[item[0]].matrix_world[0][3] += bpy.data.objects[item[0]].matrix_parent_inverse[0][3]
+            bpy.data.objects[item[0]].matrix_world[1][3] += bpy.data.objects[item[0]].matrix_parent_inverse[1][3]
+            bpy.data.objects[item[0]].matrix_world[2][3] += bpy.data.objects[item[0]].matrix_parent_inverse[2][3]
+
 
     def copy_modifier(self, source, target):
         active_object = source

@@ -65,7 +65,7 @@ bpy.types.Scene.FbxExportEngine = bpy.props.EnumProperty(
     default='unity'
 )
 bpy.types.Scene.FBXExportSelected = bpy.props.BoolProperty(name="FBXExportSelected", default=False, description="Only export collection of currently selected object")
-bpy.types.Scene.FBXExportSM = bpy.props.BoolProperty(name="FBXExportSM", default=False, description="Each collection gets a unique FBX")
+bpy.types.Scene.FBXExportSM = bpy.props.BoolProperty(name="FBXExportSM", default=False, description="Each object gets a unique FBX")
 bpy.types.Scene.FBXExportCentreMeshes = bpy.props.BoolProperty(name="FBXExportCentreMeshes", default=False, description="Center meshes before exporting. For merged meshes, any object in collection called \"origin\" will be used to set the origin before centering")
 bpy.types.Scene.FBXExportColletionIsFolder = bpy.props.BoolProperty(name="FBXExportColletionIsFolder", default=False, description="Export Collections as windows folders")
 bpy.types.Scene.FBXLeaveExport = bpy.props.BoolProperty(name="FBXLeaveExport", default=False, description="Debug option to see whats been exported")
