@@ -79,6 +79,7 @@ bpy.types.Object.FBXExportOffset = bpy.props.FloatVectorProperty(size=3)
 bpy.types.Action.Export = bpy.props.BoolProperty(name="Export")
 bpy.types.Scene.LastAnimSelected = bpy.props.StringProperty(name="Last Anim Selected")
 bpy.types.Scene.ExportStringReplace = bpy.props.StringProperty(name="what")
+bpy.types.Collection.FBXExportOffset = bpy.props.FloatVectorProperty(size=3)
 # tools
 bpy.types.Scene.NewVertexGroupName = bpy.props.StringProperty(name="Vertex Group Name", default="new vertex group", description="Path to export to")
 bpy.types.Scene.NewVertexGroupRemoveName = bpy.props.StringProperty(name="Vertex Group Remove Name", default="", description="Vertex Group to remove, leave blank for all")

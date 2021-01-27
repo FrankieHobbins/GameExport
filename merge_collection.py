@@ -30,15 +30,17 @@ class MergeCollection(bpy.types.Operator):
         col_copy.name = MergeCollection.rename_merge_collection(self, col.name)
         bpy.context.view_layer.layer_collection.collection.children.link(col_copy)
         # merge all objects into one
-        MergeCollection.merge(self, col_copy, utils.Utils.find_origin(self, col))
+        MergeCollection.merge(self, col_copy, utils.Utils.find_origin(self, col))        
         return col_copy.objects
 
-    def merge(self, col, origin_object):        
+    def merge(self, col, origin_object):
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY' and o.instance_type == "COLLECTION"]
         instance_list = [o for o in col.objects if o.instance_type != "NONE"]
         instance_object_children_list = []
         remove_list = []
+        col.FBXExportOffset = origin_object
+        print(f"seting {col} to {origin_object}")
         for o in bpy.data.objects:
             o.select_set(False)
         # deal with instanced objects, collections, faces and verts

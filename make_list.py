@@ -69,8 +69,7 @@ class MakeList(bpy.types.Operator):
                 continue
             # definitions
             children_collections = []
-            export_objects = []
-            origin_object = False  # TODO: delete?
+            export_objects = []            
             # populate export collection with objects
             utils.get_all_children_collections(self, col, children_collections)
             children_collections.append(col)

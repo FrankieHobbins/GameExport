@@ -49,7 +49,7 @@ class Utils(bpy.types.Operator):
             return col_list
 
     def find_collection(self, obj):
-        for c in bpy.data.collections:            
+        for c in bpy.data.collections:
             if obj in list(c.objects):
                 return c
 
@@ -62,6 +62,7 @@ class Utils(bpy.types.Operator):
         # see if origin_object exists in parent collections
         if not origin_object:
             origin_object = Utils.find_origin_recursive(self, col)
+        col.FBXExportOffset = origin_object
         print(f"--setting origin for col {col} at {origin_object}")
         return origin_object
 
