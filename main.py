@@ -87,39 +87,23 @@ class Main(bpy.types.Operator):
 
     def prepare_objects_for_export(self, old_col, obj_list, export_col, obj_and_pos_list):
         export_col.FBXExportOffset = bpy.data.collections[old_col].FBXExportOffset
-        print(f" export col {export_col.name} offset = {list(export_col.FBXExportOffset)} old col {old_col} offset = {list(bpy.data.collections[old_col].FBXExportOffset)}")
-        """
-        origin_object = False
-        # find the origin object and calculte the offset
-        for object in list:
-            if "origin" in object.lower():
-                origin_object = bpy.data.objects[object]
-        if origin_object:
-            for object in list:
-                if bpy.data.objects[object].type == "EMPTY" or "COL_BOX" in object or "COL_MESH" in object or "OUTLINE" in object or "!" in object:
-                    if "origin" not in object.lower():
-                        if not bpy.data.objects[object].parent:
-                            o = bpy.data.objects[object]
-                            o.parent = None
-                            o.FBXExportOffset = (o.location[0] - origin_object.location[0],
-                                                 o.location[1] - origin_object.location[1],
-                                                 o.location[2] - origin_object.location[2])
-        """
+        print(f" export col {export_col.name} offset = {list(export_col.FBXExportOffset)} old col {old_col} offset = {list(bpy.data.collections[old_col].FBXExportOffset)}")        
         # here we link objects from the list to the export collision
         for i in obj_list:
             o = bpy.data.objects[i]
-            # if o == origin_object and o.type == "EMPTY":  # dont export origin object
-            #     continue
+            if "origin" in i.lower() and o.type == "EMPTY":  # dont export origin object
+                continue
             export_col.objects.link(o)
             if bpy.context.scene.FBXExportCentreMeshes and not o.parent:
                 o = bpy.data.objects[i]
                 o_pos = o.location.copy()
-                obj_and_pos_list.append([o, o_pos])
-                # o.location = (0, 0, 0)
-                if export_col.FBXExportOffset:
+                obj_and_pos_list.append([o, o_pos])                
+                if export_col.FBXExportOffset and o.type == "EMPTY" or "COL_BOX" in i or "COL_MESH" in i or "OUTLINE" in i or "!" in i:
                     o.location = (o.location[0] - export_col.FBXExportOffset[0],
                                   o.location[1] - export_col.FBXExportOffset[1],
                                   o.location[2] - export_col.FBXExportOffset[2])
+                else:
+                    o.location = (0, 0, 0)
             if bpy.context.scene.FBXFlipUVIndex:
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
@@ -129,6 +113,8 @@ class Main(bpy.types.Operator):
             utils.Utils.lod(self, objects, lod_collection[0], export_col)
 
     def cleanup(self, obj_list, export_col, obj_and_pos_list):
+        if bpy.context.scene.FBXLeaveExport:
+            return
         for ii in obj_and_pos_list:
             ii[0].location = ii[1]
         if bpy.context.scene.FBXFlipUVIndex:
@@ -171,6 +157,8 @@ class Main(bpy.types.Operator):
                 bpy.data.collections.remove(c)
 
     def status_reset(self, active_vlc, active_object, selected_objects):
+        if bpy.context.scene.FBXLeaveExport:
+            return
         bpy.context.view_layer.active_layer_collection = active_vlc
         bpy.context.view_layer.objects.active = active_object
         for ob in selected_objects:

@@ -62,8 +62,9 @@ class Utils(bpy.types.Operator):
         # see if origin_object exists in parent collections
         if not origin_object:
             origin_object = Utils.find_origin_recursive(self, col)
-        col.FBXExportOffset = origin_object
-        print(f"--setting origin for col {col} at {origin_object}")
+        else:
+            col.FBXExportOffset = origin_object
+            print(f"--setting origin for col {col} at {origin_object}")
         return origin_object
 
     def find_origin_recursive(self, col):

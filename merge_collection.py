@@ -30,7 +30,7 @@ class MergeCollection(bpy.types.Operator):
         col_copy.name = MergeCollection.rename_merge_collection(self, col.name)
         bpy.context.view_layer.layer_collection.collection.children.link(col_copy)
         # merge all objects into one
-        MergeCollection.merge(self, col_copy, utils.Utils.find_origin(self, col))        
+        MergeCollection.merge(self, col_copy, utils.Utils.find_origin(self, col))
         return col_copy.objects
 
     def merge(self, col, origin_object):
@@ -39,8 +39,9 @@ class MergeCollection(bpy.types.Operator):
         instance_list = [o for o in col.objects if o.instance_type != "NONE"]
         instance_object_children_list = []
         remove_list = []
-        col.FBXExportOffset = origin_object
-        print(f"seting {col} to {origin_object}")
+        if origin_object:
+            col.FBXExportOffset = origin_object
+            print (f"seting {col} to {origin_object}")
         for o in bpy.data.objects:
             o.select_set(False)
         # deal with instanced objects, collections, faces and verts
@@ -101,6 +102,7 @@ class MergeCollection(bpy.types.Operator):
                 bpy.context.scene.cursor.location = origin_object
                 bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
                 bpy.context.scene.cursor.location = org_loc
+            #bpy.context.active_object.location = (0,0,0)
         # deal with objects we didnt want to merge but want to keep their name
         for o in col.objects:
             if "_M_" in o.name:
