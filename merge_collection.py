@@ -36,13 +36,15 @@ class MergeCollection(bpy.types.Operator):
     def merge(self, col, origin_object):
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY' and o.instance_type == "COLLECTION"]
+        instance_list = [o for o in col.objects if o.instance_type is not "NONE"]
         for o in bpy.data.objects:
             o.select_set(False)
         # deal with empty objects that could have be instances of meshes
         if bpy.context.scene.FBXFreezeInstances:
-            if len(empty_list) > 0:
-                bpy.context.view_layer.objects.active = empty_list[0]
-                for o in empty_list:
+            
+            if len(instance_list) > 0:
+                bpy.context.view_layer.objects.active = instance_list[0]
+                for o in instance_list:
                     o.select_set(True)
                 bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=True)
                 # bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=False)

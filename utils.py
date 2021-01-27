@@ -36,7 +36,7 @@ class Utils(bpy.types.Operator):
         if col.name in bpy.context.view_layer.layer_collection.children:
             return col
         for c in bpy.data.collections:
-            if col.name in bpy.data.collections.children:
+            if col.name in c.children:
                 return(Utils.find_parent_recursive(self, c))
 
     def find_view_layer_collection(self, col, col_layer, col_list):
@@ -55,7 +55,6 @@ class Utils(bpy.types.Operator):
 
     def find_origin(self, col):
         origin_object = False
-        print(f"-- finding origin for col {col}")
         # see if origin_object exists in current collection
         for o in col.objects:
             if "origin" in o.name.lower():
@@ -63,8 +62,7 @@ class Utils(bpy.types.Operator):
         # see if origin_object exists in parent collections
         if not origin_object:
             origin_object = Utils.find_origin_recursive(self, col)
-        print(origin_object)
-        print("finishing")
+        print(f"--setting origin for col {col} at {origin_object}")
         return origin_object
 
     def find_origin_recursive(self, col):
@@ -245,26 +243,30 @@ class Utils(bpy.types.Operator):
                 pass
         bpy.context.view_layer.objects.active = a
 
-    def duplicate(self, name, object, col):
-        data = object.data
-        new_obj = bpy.data.objects.new(name, data)
-        # col = Utils.find_collection(self, object)
+    def duplicate(self, name, old_obj, col):
+        new_obj = bpy.data.objects.new(name, old_obj.data.copy())
         col.objects.link(new_obj)
-        new_obj.matrix_world = object.matrix_world
-        for vertexGroup in object.vertex_groups:
+        # new_obj.matrix_world = old_obj.matrix_world
+        new_obj.location = old_obj.location
+        # print(f"{new_obj} at {new_obj.location} and {old_obj} at {old_obj.location}")
+        for vertexGroup in old_obj.vertex_groups:
             new_obj.vertex_groups.new(name=vertexGroup.name)
+        if old_obj.FBXExportOffset:
+            new_obj.FBXExportOffset = old_obj.FBXExportOffset
         return new_obj
 
     def lod(self, objects_to_lod, lod_collection, export_collection):
-        # objects_to_lod = bpy.context.selected_objects
-        remove = False
-        for lod_obj in objects_to_lod:            
+        for lod_obj in objects_to_lod:
+            remove_source_object = False
             for element in lod_obj.vertex_groups:
-                objects = [i for i in lod_collection.objects if element.name in i.name]
-                for o in objects:
-                    remove = True
+                new_objects_to_make = [i for i in lod_collection.objects if element.name in i.name]
+                for o in new_objects_to_make:
+                    remove_source_object = True
                     new_obj = Utils.duplicate(self, o.name, lod_obj, export_collection)
                     Utils.copy_modifier(self, bpy.data.objects[o.name], new_obj)
-        if remove:
-            export_collection.objects.unlink(lod_obj)
-            
+                    names_to_delete_uvs = ["Frames", "Details", "Shell"]  # TODO: make global
+                    if element.name in names_to_delete_uvs:
+                        for u in new_obj.data.uv_layers:
+                            new_obj.data.uv_layers.remove(u)
+            if remove_source_object:
+                export_collection.objects.unlink(lod_obj)
