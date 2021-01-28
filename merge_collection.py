@@ -34,6 +34,7 @@ class MergeCollection(bpy.types.Operator):
         return col_copy.objects
 
     def merge(self, col, origin_object):
+        print (f"merging {col.name}")
         obj_list = [o for o in col.objects if o.type == 'MESH']
         empty_list = [o for o in col.objects if o.type == 'EMPTY' and o.instance_type == "COLLECTION"]
         instance_list = [o for o in col.objects if o.instance_type != "NONE"]
@@ -41,7 +42,7 @@ class MergeCollection(bpy.types.Operator):
         remove_list = []
         if origin_object:
             col.FBXExportOffset = origin_object
-            print (f"seting {col} to {origin_object}")
+            #print (f"seting {col} to {origin_object}")
         for o in bpy.data.objects:
             o.select_set(False)
         # deal with instanced objects, collections, faces and verts
@@ -53,7 +54,7 @@ class MergeCollection(bpy.types.Operator):
                     instance_object_children_list = [i for i in o.children]
                 bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=True)
                 for ob in bpy.context.selected_objects:
-                    print(ob)
+                    #print(ob)
                     if ob.type == "MESH":
                         ob.data = ob.data.copy()  # make objects single user
                 obj_list += bpy.context.selected_editable_objects

@@ -64,7 +64,7 @@ class Utils(bpy.types.Operator):
             origin_object = Utils.find_origin_recursive(self, col)
         else:
             col.FBXExportOffset = origin_object
-            print(f"--setting origin for col {col} at {origin_object}")
+            # print(f"--setting origin for col {col} at {origin_object}")
         return origin_object
 
     def find_origin_recursive(self, col):
@@ -142,7 +142,13 @@ class Utils(bpy.types.Operator):
         child_parent_list = []
         for obj in old_col.objects:
             if obj.parent and obj.parent.name in old_col.objects:
-                child_parent_list.append([merge_prefix + obj.name, merge_prefix + obj.parent.name])
+                obj_name = obj.name
+                if obj.type == "MESH":
+                    obj_name = merge_prefix + obj_name
+                obj_parent_name = obj.parent.name
+                if obj.parent.type == "MESH":
+                    obj_parent_name = merge_prefix + obj_parent_name
+                child_parent_list.append([obj_name, obj_parent_name])
             if obj.type == "MESH":
                 new_obj = obj.copy()
                 new_obj.name = merge_prefix + obj.name
