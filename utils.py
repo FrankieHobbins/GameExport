@@ -214,7 +214,7 @@ class Utils(bpy.types.Operator):
                 path = path.replace("Source~", "")
             if "Art_Source" in path:
                 # TODO put these in user prefs
-                path = path.replace("Art_Source", "UP_Client")
+                path = path.replace("Art_Source", "Game\\UP_Client")
         if ".blend" in path:
             path = path.replace(".blend", ".fbx")
         if ".Blend" in path:

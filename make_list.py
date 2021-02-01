@@ -57,7 +57,9 @@ class MakeList(bpy.types.Operator):
             new_list_2 = {i for i in new_list if i not in new_list_1}
             # find parent collections
             new_list_3 = {utils.find_parent_recursive(self, i) for i in new_list_2}
-            MakeList.list_of_collections_to_export = new_list_3
+            # remove none type which can happen if an object is in a collection which is not in the view layer collection
+            new_list_4 = {i for i in new_list_3 if i != None}
+            MakeList.list_of_collections_to_export = new_list_4
 
     def make_export_list(self, vlc, bake):
         export_list = []  # collection name and objects inside it
