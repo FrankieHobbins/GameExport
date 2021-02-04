@@ -86,8 +86,11 @@ class Main(bpy.types.Operator):
         self.status_reset(active_vlc, active_object, selected_objects)
 
     def prepare_objects_for_export(self, old_col, obj_list, export_col, obj_and_pos_list):
-        export_col.FBXExportOffset = bpy.data.collections[old_col].FBXExportOffset
-        print(f" export col {export_col.name} offset = {list(export_col.FBXExportOffset)} old col {old_col} offset = {list(bpy.data.collections[old_col].FBXExportOffset)}")        
+        try: 
+            export_col.FBXExportOffset = bpy.data.collections[old_col].FBXExportOffset
+        except:
+            export_col.FBXExportOffset = (0, 0, 0)
+        # print(f" export col {export_col.name} offset = {list(export_col.FBXExportOffset)} old col {old_col} offset = {list(bpy.data.collections[old_col].FBXExportOffset)}")
         # here we link objects from the list to the export collision
         for i in obj_list:
             o = bpy.data.objects[i]
@@ -108,7 +111,7 @@ class Main(bpy.types.Operator):
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
         lod_collection = [i for i in bpy.data.collections if "LODS" in i.name]
-        if len(lod_collection):
+        if len(lod_collection) and not bpy.context.scene.FBXDontLod:
             objects = [i for i in export_col.objects if i.type == "MESH"]
             utils.Utils.lod(self, objects, lod_collection[0], export_col)
 
