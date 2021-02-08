@@ -140,6 +140,7 @@ class Utils(bpy.types.Operator):
     def duplicate_objects(self, old_col, new_col):
         merge_prefix = "_M_"  # TODO make global
         child_parent_list = []
+        
         for obj in old_col.objects:
             if obj.parent and obj.parent.name in old_col.objects:
                 obj_name = obj.name
@@ -155,7 +156,7 @@ class Utils(bpy.types.Operator):
                 new_obj.data = obj.data.copy()
                 new_obj.parent = obj.parent
                 new_col.objects.link(new_obj)
-            elif obj.instance_type == "COLLECTION":
+            elif obj.instance_type == "COLLECTION" and not bpy.context.scene.FBXCullInstanceCollections:
                 new_empty = bpy.data.objects.new("empty", None)
                 new_empty.name = obj.name + "_DUPLICATE"
                 new_col.objects.link(new_empty)
@@ -171,7 +172,6 @@ class Utils(bpy.types.Operator):
             bpy.data.objects[item[0]].matrix_world[0][3] += bpy.data.objects[item[0]].matrix_parent_inverse[0][3]
             bpy.data.objects[item[0]].matrix_world[1][3] += bpy.data.objects[item[0]].matrix_parent_inverse[1][3]
             bpy.data.objects[item[0]].matrix_world[2][3] += bpy.data.objects[item[0]].matrix_parent_inverse[2][3]
-
 
     def copy_modifier(self, source, target):
         active_object = source

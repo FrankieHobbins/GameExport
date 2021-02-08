@@ -168,6 +168,8 @@ class PANEL_PT_gameexportsettings(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FBXFreezeInstances", text="Freeze Instances")
         row = layout.row()
+        row.prop(context.scene, "FBXCullInstanceCollections", text="Disallow Empty Instances")
+        row = layout.row()
         row.prop(context.scene, "FBXExportColletionIsFolder", text="Collection is Folder")
         row = layout.row()
         row.prop(context.scene, "FBXFlipUVIndex", text="Reverse UV channels")

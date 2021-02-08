@@ -74,23 +74,23 @@ class Main(bpy.types.Operator):
         # make a list of everything I want to export, keep a list of things I want to delete later, merging gets done in here
         export_list, objects_to_delete = make_list.MakeList.make_export_list(self, vlc, bake)
         obj_and_pos_list = []
+        obj_and_instance_type = []
         # go though the export list and do the export
         for i in export_list:
             export_col = self.create_export_col(vlc)
             path = ut.setpath(self, i[0])
-            self.prepare_objects_for_export(i[0], i[1], export_col, obj_and_pos_list)
+            self.prepare_objects_for_export(i[0], i[1], export_col, obj_and_pos_list, obj_and_instance_type)
             export.FBXExport.export(self, path, export_col)
-            self.cleanup(i[1], export_col, obj_and_pos_list)
+            self.cleanup(i[1], export_col, obj_and_pos_list, obj_and_instance_type)
         # restore cached data
         self.cleanup_merged(objects_to_delete)
         self.status_reset(active_vlc, active_object, selected_objects)
 
-    def prepare_objects_for_export(self, old_col, obj_list, export_col, obj_and_pos_list):
-        try: 
+    def prepare_objects_for_export(self, old_col, obj_list, export_col, obj_and_pos_list, obj_and_instance_type):
+        try:
             export_col.FBXExportOffset = bpy.data.collections[old_col].FBXExportOffset
         except:
             export_col.FBXExportOffset = (0, 0, 0)
-        # print(f" export col {export_col.name} offset = {list(export_col.FBXExportOffset)} old col {old_col} offset = {list(bpy.data.collections[old_col].FBXExportOffset)}")
         # here we link objects from the list to the export collision
         for i in obj_list:
             o = bpy.data.objects[i]
@@ -100,7 +100,7 @@ class Main(bpy.types.Operator):
             if bpy.context.scene.FBXExportCentreMeshes and not o.parent:
                 o = bpy.data.objects[i]
                 o_pos = o.location.copy()
-                obj_and_pos_list.append([o, o_pos])                
+                obj_and_pos_list.append([o, o_pos])
                 if export_col.FBXExportOffset and o.type == "EMPTY" or "COL_BOX" in i or "COL_MESH" in i or "OUTLINE" in i or "!" in i:
                     o.location = (o.location[0] - export_col.FBXExportOffset[0],
                                   o.location[1] - export_col.FBXExportOffset[1],
@@ -110,12 +110,15 @@ class Main(bpy.types.Operator):
             if bpy.context.scene.FBXFlipUVIndex:
                 bpy.context.view_layer.objects.active = bpy.data.objects[i]
                 ut.flipUVIndex(self)
+            if o.instance_type != "NONE" and bpy.context.scene.FBXCullInstanceCollections:
+                obj_and_instance_type.append([o, o.instance_type])
+                o.instance_type = "NONE"
         lod_collection = [i for i in bpy.data.collections if "LODS" in i.name]
         if len(lod_collection) and not bpy.context.scene.FBXDontLod:
             objects = [i for i in export_col.objects if i.type == "MESH"]
             utils.Utils.lod(self, objects, lod_collection[0], export_col)
 
-    def cleanup(self, obj_list, export_col, obj_and_pos_list):
+    def cleanup(self, obj_list, export_col, obj_and_pos_list, obj_and_instance_type):
         if bpy.context.scene.FBXLeaveExport:
             return
         for ii in obj_and_pos_list:
@@ -126,6 +129,8 @@ class Main(bpy.types.Operator):
                 ut.flipUVIndex(self)
         if bpy.context.scene.FBXLeaveExport or self.process_without_export:
             return
+        for o in obj_and_instance_type:
+            o[0].instance_type = o[1]
         export_col.name = "Collection To Delete"
         bpy.data.collections.remove(export_col)
 
