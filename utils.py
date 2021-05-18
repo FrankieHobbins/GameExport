@@ -189,7 +189,11 @@ class Utils(bpy.types.Operator):
 
     def setpath(self, col_name):
         path = bpy.context.scene.FbxExportPath
-        path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences.user_path)
+        print("path is: ",path)
+        if bpy.context.preferences.addons['GameExport'].preferences.user_path != "":
+            print("path is not blank")
+            path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences.user_path)
+
         prefix = bpy.context.scene.FbxExportPrefix
         if path == "":
             path = os.path.dirname(bpy.data.filepath) + "\\"

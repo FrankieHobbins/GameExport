@@ -149,8 +149,10 @@ class PANEL_PT_gameexportsettings(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FbxExportPath", text="path")
         path = bpy.context.scene.FbxExportPath
-        path = path.replace("$path$", bpy.context.preferences.addons[__package__].preferences.user_path)
-        layout.label(text=path)
+        if bpy.context.preferences.addons['GameExport'].preferences.user_path != "":
+            print("path is not blank")
+            path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences.user_path)
+            layout.label(text=path)
         row = layout.row()
         row.prop(context.scene, "FbxExportPrefix", text="prefix")
         row = layout.row()
@@ -200,7 +202,9 @@ class OpenFolder(bpy.types.Operator):
     def execute(self, context):
         # open folder in windows explorer
         path = bpy.context.scene.FbxExportPath
-        path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences.user_path)
+        if bpy.context.preferences.addons['GameExport'].preferences.user_path != "":
+            print("path is not blank")
+            path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences.user_path)
         bpy.ops.wm.path_open(filepath=path)
         return {'FINISHED'}
 

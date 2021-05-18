@@ -50,7 +50,9 @@ classes = (
 
 
 def update_path(self, context):
-    self.FbxExportPath = self.FbxExportPath.replace(bpy.context.preferences.addons[__package__].preferences.user_path, "$path$")
+    if bpy.context.preferences.addons[__package__].preferences.user_path != "":
+        self.FbxExportPath = self.FbxExportPath.replace(bpy.context.preferences.addons[__package__].preferences.user_path, "$path$")
+    
 
 
 bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", default="", subtype="DIR_PATH", description="Path to export to", update=update_path)
