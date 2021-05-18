@@ -2,11 +2,11 @@ import importlib
 import bpy
 bl_info = {
     "name": "Game Export",
-    "description": "A Game Exporter",
-    "author": "Frankie Hobbins",
-    "version": (1, 1, 9),
-    "blender": (2, 90, 0),
-    "wiki_url": "my github url here",
+    "description": "Advanced Exporter with tools and features to improve workflow.",
+    "author": "Frankie Hobbins, Jac Rossiter",
+    "version": (1, 2, 0),
+    "blender": (2, 92, 0),
+    "wiki_url": "https://github.com/FrankieHobbins/GameExport",
     "category": "Import-Export"
 }
 

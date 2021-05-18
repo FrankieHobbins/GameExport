@@ -95,6 +95,7 @@ class Utils(bpy.types.Operator):
         
         exclusion_list = ["*", "cutter"]  # TODO place in user prefs
         if bpy.context.scene.FBXExportHigh == False:
+
             exclusion_list = exclusion_list + high
         if bpy.context.scene.FBXExportLow == False:
             exclusion_list = exclusion_list + low
