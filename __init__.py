@@ -76,6 +76,8 @@ bpy.types.Scene.FBXDontLod = bpy.props.BoolProperty(name="FBXDontLod", default=F
 # bpy.types.Scene.FBXProcessWithoutExport = bpy.props.BoolProperty(name="FBXProcessWithoutExport", default=True, description="Debug option to process without exporting")
 bpy.types.Scene.FBXFixUnityRotation = bpy.props.BoolProperty(name="FBXFixUnityRotation", default=False, description="Rotate on export to fix the issue where models appaer in unity with rotation offset")
 bpy.types.Scene.FBXFlipUVIndex = bpy.props.BoolProperty(name="FBXFlipUVIndex", default=False, description="Set UV0 to be UV1 and UV1 to be UV0")
+bpy.types.Scene.FBXExportHigh = bpy.props.BoolProperty(name="FBXExportHigh", default=True, description="Disable Exporting of Highpoly Meshes")
+bpy.types.Scene.FBXExportLow = bpy.props.BoolProperty(name="FBXExportLow", default=True, description="Disable Exporting of Lowpoly Meshes")
 bpy.types.Scene.FBXKeepEmpties = bpy.props.BoolProperty(name="FBXKeepEmpties", default=False, description="Keep empties, apart from origins")
 bpy.types.Scene.FBXFreezeInstances = bpy.props.BoolProperty(name="FBXFreezeInstances", default=False, description="Turn instance geo into real geo")
 bpy.types.Scene.FBXCullInstanceCollections = bpy.props.BoolProperty(name="FBXCullInstanceCollections", default=False, description="Set empty collections to none before exporting")

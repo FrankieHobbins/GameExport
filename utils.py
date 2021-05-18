@@ -81,8 +81,8 @@ class Utils(bpy.types.Operator):
         return origin_object
 
     def is_valid(self, col, bake):
-        low = ["low_", "lo_", "_low", "_lo"]
-        high = ["high_", "hi_", "_high", "_hi"]
+        low = ["low_", "lo_", "_low", "_lo", "_Low", "_LOW"]
+        high = ["high_", "hi_", "_high", "_hi", "_High", "_HIGH"]
         if bake == "low":
             if not any(col.name.lower().find(el) != -1 for el in low):
                 return False
@@ -92,7 +92,14 @@ class Utils(bpy.types.Operator):
         if bake == "":
             if "^" in col.name:
                 return False
+        
         exclusion_list = ["*", "cutter"]  # TODO place in user prefs
+        if bpy.context.scene.FBXExportHigh == False:
+
+            exclusion_list = exclusion_list + high
+        if bpy.context.scene.FBXExportLow == False:
+            exclusion_list = exclusion_list + low
+
         for i in exclusion_list:
             if i.lower() in col.name.lower():
                 return False
