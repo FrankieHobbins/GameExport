@@ -222,15 +222,18 @@ class Utils(bpy.types.Operator):
         return path
 
     def actionstoNLA(self, filter):
-        for nlatrack in bpy.context.object.animation_data.nla_tracks:
-            bpy.context.object.animation_data.nla_tracks.remove(nlatrack)
+        try:
+            for nlatrack in bpy.context.object.animation_data.nla_tracks:
+                bpy.context.object.animation_data.nla_tracks.remove(nlatrack)
 
-        for action in bpy.data.actions:
-            if filter in action.name:
-                bpy.context.object.animation_data.nla_tracks.new()
-                bpy.context.object.animation_data.nla_tracks[(len(bpy.context.object.animation_data.nla_tracks)-1)].name = action.name
-                bpy.context.object.animation_data.nla_tracks[(len(bpy.context.object.animation_data.nla_tracks)-1)].strips.new(action.name,0,action)
-
+            for action in bpy.data.actions:
+                if filter in action.name:
+                    bpy.context.object.animation_data.nla_tracks.new()
+                    bpy.context.object.animation_data.nla_tracks[(len(bpy.context.object.animation_data.nla_tracks)-1)].name = action.name
+                    bpy.context.object.animation_data.nla_tracks[(len(bpy.context.object.animation_data.nla_tracks)-1)].strips.new(action.name,0,action)
+        except:
+            pass
+        
     def flipUVIndex(self):
         uvl = bpy.context.view_layer.objects.active.data.uv_layers
         if (len(uvl) == 2):

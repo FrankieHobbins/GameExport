@@ -177,7 +177,6 @@ class PANEL_PT_gameexportsettings(bpy.types.Panel):
         row.prop(context.scene, "FBXLeaveExport", text="DEBUG: Leave Objects")
         row = layout.row()
         row.prop(context.scene, "FBXDontLod", text="DEBUG: Dont Lod")
-        """
         if len(bpy.data.actions) > 0:
             layout.template_list("ACTIONS_UL_List", "", bpy.data, "actions", context.object, "action_list_index", rows=2)
             try:
@@ -190,8 +189,6 @@ class PANEL_PT_gameexportsettings(bpy.types.Panel):
                 bpy.types.Scene.LastAnimSelected = bpy.data.actions[bpy.context.object.action_list_index]  # lets you selected with the action dropdown from action editor
             except:
                 pass
-        """
-
 
 class OpenFolder(bpy.types.Operator):
     # not currently used
