@@ -9,4 +9,4 @@ Tags:
 
 * - Collection will be ignored and not exported (Useful for booleans for example)
 
-! - Exclude from Merging```
+! - Exclude from Merging
