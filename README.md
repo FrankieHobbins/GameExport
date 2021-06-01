@@ -2,6 +2,15 @@
 
 GameExport is an FBX Export Addon for Blender 2.8 and onwards. It's core feature is the ability to tag collections using symbols, these tags define custom export parameters. 
 
+
+## Export Buttons
+
+**Export:** Exports everything in Scene
+
+**Selected:** Exports only selected Collection
+
+**Bake:** Exports all collections with "_high" or "_low" in collection name
+
 ## Tags:
 
 ```
@@ -13,13 +22,16 @@ GameExport is an FBX Export Addon for Blender 2.8 and onwards. It's core feature
 ! - Exclude from Merging
 
 ```
-## Export Buttons
+## Things to Note
 
-**Export:** Exports everything in Scene
+* No symbol on a collection will export each object inside individually
 
-**Selected:** Exports only selected Collection
+* Any object with origin in the name in the collection sets the origin
 
-**Bake:** Exports all collections with "_high" or "_low" in collection name
+* All materials should match the collection name for substance painter to interpret everything correctly.
+
+* Baked stuff going in it’s own collection, shares same material though. Offset uvs outside of 0-1 if you don’t want the baking to have problems)
+
 
 ## Settings
 
