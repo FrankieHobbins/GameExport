@@ -179,9 +179,9 @@ class PANEL_PT_gameexportsettings(bpy.types.Panel):
         row.prop(context.scene, "FBXExportHigh", text="Export High")
         row.prop(context.scene, "FBXExportLow", text="Export Low")
         row = layout.row()
-        row.prop(context.scene, "FBXLeaveExport", text="DEBUG: Leave Objects")
+        row.prop(context.scene, "FBXLeaveExport", text="DEBUG: Keep Export Objects")
         row = layout.row()
-        row.prop(context.scene, "FBXDontLod", text="DEBUG: Dont Lod")
+        row.prop(context.scene, "FBXDontLod", text="DEBUG: Disable Special LOD Feature")
         if len(bpy.data.actions) > 0:
             layout.template_list("ACTIONS_UL_List", "", bpy.data, "actions", context.object, "action_list_index", rows=2)
             try:

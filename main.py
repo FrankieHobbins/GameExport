@@ -37,14 +37,15 @@ class Main(bpy.types.Operator):
 
     def execute(self, context):
         # make lists
+        print("exporting")
         make_list.MakeList.reset(self)
         make_list.MakeList.make_list(self)
-        try:
-            bpy.ops.object.mode_set(mode='OBJECT')
-        except:
-            if self.selected:
-                print("nothing selected so not exporting anything")
-                return {"FINISHED"}
+        #try:
+        #    bpy.ops.object.mode_set(mode='OBJECT')
+        #except:
+        #    if self.selected:
+        #        print("nothing selected so not exporting anything")
+        #        return {"FINISHED"}
             
         # for baking
         if self.bake:
