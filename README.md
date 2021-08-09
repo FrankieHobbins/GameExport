@@ -43,3 +43,5 @@ Scale: Set Export Scale (Default is 1).
 
 Engine: Define if you are using Unreal of Unity. This is affect the export transforms. (For Snowdrop use Unity)
 
+Center: Centers objects to world zero for export. When using merge collection tags it will not center your object. To get it to work, make sure you have an empty inside the merge collection with the tag 'origin' this will be the merged objects new origin, it will also then move to world zero(if center is enabled in settings)
+
