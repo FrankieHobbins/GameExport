@@ -4,8 +4,8 @@ bl_info = {
     "name": "Game Export",
     "description": "Advanced Exporter with tools and features to improve workflow.",
     "author": "Frankie Hobbins, Jac Rossiter",
-    "version": (1, 2, 0),
-    "blender": (2, 92, 0),
+    "version": (1, 3, 0),
+    "blender": (3, 2, 0),
     "wiki_url": "https://github.com/FrankieHobbins/GameExport",
     "category": "Import-Export"
 }
