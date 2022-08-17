@@ -104,12 +104,6 @@ class MergeCollection(bpy.types.Operator):
                 bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
                 bpy.context.scene.cursor.location = org_loc
             #bpy.context.active_object.location = (0,0,0)
-        # deal with objects we didnt want to merge but want to keep their name
-        for o in col.objects:
-            if "_M_" in o.name:
-                new_name = o.name.replace("_M_", "")
-                bpy.data.objects[new_name].name = new_name + "_CONFLICT__"
-                o.name = new_name
         for o in bpy.data.objects:
             o.select_set(False)
 
