@@ -246,19 +246,22 @@ class Utils(bpy.types.Operator):
             pass
         
     def flipUVIndex(self):
-        uvl = bpy.context.view_layer.objects.active.data.uv_layers
-        if (len(uvl) == 2):
-            # set active uv to 0
-            uvl.active_index = 0
-            # get 0 name
-            name = uvl[0].name
-            # duplicate, will end up at 2
-            bpy.ops.mesh.uv_texture_add()
-            # delete 0
-            uvl.active_index = 0
-            bpy.ops.mesh.uv_texture_remove()
-            # set index 1 to be name
-            uvl[1].name = name
+        try:
+            uvl = bpy.context.view_layer.objects.active.data.uv_layers
+            if (len(uvl) == 2):
+                # set active uv to 0
+                uvl.active_index = 0
+                # get 0 name
+                name = uvl[0].name
+                # duplicate, will end up at 2
+                bpy.ops.mesh.uv_texture_add()
+                # delete 0
+                uvl.active_index = 0
+                bpy.ops.mesh.uv_texture_remove()
+                # set index 1 to be name
+                uvl[1].name = name
+        except:
+            pass
 
     def addCustomNormalsToSelected(self):
         a = bpy.context.active_object
