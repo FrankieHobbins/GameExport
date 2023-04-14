@@ -71,7 +71,7 @@ class MakeList(bpy.types.Operator):
                 continue
             # definitions
             children_collections = []
-            export_objects = []            
+            export_objects = []
             # populate export collection with objects
             utils.get_all_children_collections(self, col, children_collections)
             children_collections.append(col)
@@ -101,7 +101,7 @@ class MakeList(bpy.types.Operator):
             individual_export_list = []
             for i in export_list:
                 for ii in i[1]:
-                    individual_export_list.append([ii, [ii]])
+                    individual_export_list.append([i[0], [ii]])
             export_list = individual_export_list
         # dont delete empties that already existed
         for i in objects_to_not_delete:

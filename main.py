@@ -46,11 +46,11 @@ class Main(bpy.types.Operator):
         #    if self.selected:
         #        print("nothing selected so not exporting anything")
         #        return {"FINISHED"}
-            
+
         # for baking
         if self.bake:
             print("exporting bake")
-            path = ut.setpath(self, bpy.path.basename(bpy.context.blend_data.filepath.replace(".blend", "")))
+            path = ut.setpath(self, bpy.path.basename(bpy.context.blend_data.filepath.replace(".blend", "")), "")
             self.call_export("high")
             self.call_export("low")
         # for special UP workflow
@@ -78,8 +78,12 @@ class Main(bpy.types.Operator):
         obj_and_instance_type = []
         # go though the export list and do the export
         for i in export_list:
+            if bpy.context.scene.FBXExportColletionIsFolder and bpy.context.scene.FBXExportSM:
+                object = i[1][0]
+                if bpy.data.objects[object] not in selected_objects:
+                    continue
             export_col = self.create_export_col(vlc)
-            path = ut.setpath(self, i[0])
+            path = ut.setpath(self, i[0], i[1][0])
             self.prepare_objects_for_export(i[0], i[1], export_col, obj_and_pos_list, obj_and_instance_type)
             export.FBXExport.export(self, path, export_col)
             self.cleanup(i[1], export_col, obj_and_pos_list, obj_and_instance_type)

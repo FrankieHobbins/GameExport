@@ -1,3 +1,4 @@
+from multiprocessing import context
 import bpy
 import os
 from mathutils import Vector
@@ -38,6 +39,28 @@ class Utils(bpy.types.Operator):
         for c in bpy.data.collections:
             if col.name in c.children:
                 return(Utils.find_parent_recursive(self, c))
+
+                
+    def get_collection_hierarchy(obj):
+        """Returns a list of names of all parent collections of an object"""
+        hierarchy = []
+        for collection in obj.users_collection:
+            hierarchy.append(collection.name)
+            hierarchy += get_collection_hierarchy(collection)
+            
+        # Get the names of all parent collections of the object
+        collection_names = get_collection_hierarchy(obj)
+
+        # Combine the names into a single string
+        collection_string = "".join(collection_names)
+
+        return hierarchy
+
+        obj = bpy.context.object
+
+
+
+        return collection_string
 
     def find_view_layer_collection(self, col, col_layer, col_list):
         if col_layer.collection == col:
@@ -194,22 +217,29 @@ class Utils(bpy.types.Operator):
             for prop in properties:
                 setattr(m_dst, prop, getattr(m_src, prop))
 
-    def setpath(self, col_name):
+    def setpath(self, col_name, object_name):
         path = bpy.context.scene.FbxExportPath
         print("path is: ",path)
         if bpy.context.preferences.addons['GameExport'].preferences.user_path != "":
             print("path is not blank")
             path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences.user_path)
-
         prefix = bpy.context.scene.FbxExportPrefix
         if path == "":
             path = os.path.dirname(bpy.data.filepath) + "\\"
         elif path[1] != ":":
             path = os.path.dirname(bpy.data.filepath) + "\\" + path
         col_name = col_name.replace("&", "")  # TODO replace with global
-        if bpy.context.scene.FBXExportColletionIsFolder:
-            col_name = col_name + "\\" + col_name
-        path += prefix + col_name + ".fbx"
+        if bpy.context.scene.FBXExportColletionIsFolder and bpy.context.scene.FBXExportSM:
+            path += col_name + "\\" + prefix + object_name + ".fbx"
+        elif bpy.context.scene.FBXExportColletionIsFolder and not bpy.context.scene.FBXExportSM:
+            if col_name.endswith("\\"):
+                col_name = col_name.rstrip("\\")
+            last_slash_index = col_name.rfind("\\")
+            if last_slash_index != -1:
+                col_name = col_name[:last_slash_index+1] + prefix + col_name[last_slash_index+1:]
+            path += col_name + ".fbx"
+        else:
+            path += prefix + col_name + ".fbx"
         try:
             dir_name = os.path.dirname(path)
             os.makedirs(dir_name)
