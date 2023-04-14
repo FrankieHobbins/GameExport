@@ -71,7 +71,7 @@ class MakeList(bpy.types.Operator):
                 continue
             # definitions
             children_collections = []
-            export_objects = []
+            export_objects = []            
             # populate export collection with objects
             utils.get_all_children_collections(self, col, children_collections)
             children_collections.append(col)
@@ -100,8 +100,13 @@ class MakeList(bpy.types.Operator):
         if bpy.context.scene.FBXExportSM:
             individual_export_list = []
             for i in export_list:
+                print("------------", i)
                 for ii in i[1]:
-                    individual_export_list.append([i[0], [ii]])
+                    fullpath = utils.find_parent_path_recursive(self, bpy.data.objects[ii].users_collection[-1], "")
+                    if "__MERGED_" in fullpath:
+                        fullpath = fullpath.split("__MERGED_")[1]
+                    print(fullpath, " ", ii)
+                    individual_export_list.append([fullpath, [ii]])
             export_list = individual_export_list
         # dont delete empties that already existed
         for i in objects_to_not_delete:
