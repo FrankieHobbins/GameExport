@@ -73,7 +73,7 @@ class Main(bpy.types.Operator):
         for o in bpy.context.selected_objects:
             o.select_set(False)
         # make a list of everything I want to export, keep a list of things I want to delete later, merging gets done in here
-        export_list, objects_to_delete = make_list.MakeList.make_export_list(self, vlc, bake)
+        export_list, objects_to_delete = make_list.MakeList.make_export_list(self, selected_objects, bake)
         obj_and_pos_list = []
         obj_and_instance_type = []
         # go though the export list and do the export
