@@ -217,6 +217,8 @@ class Utils(bpy.types.Operator):
         if bpy.context.scene.FBXExportColletionIsFolder:
             print(col_name, obj_name[0])
             path += col_name + "\\" + prefix + obj_name[0] + ".fbx"
+        elif bpy.context.scene.FBXExportSM:
+            path += prefix + col_name + obj_name[0] + ".fbx"
         else:
             path += prefix + col_name + ".fbx"
         try:

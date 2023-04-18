@@ -103,14 +103,11 @@ class MakeList(bpy.types.Operator):
             print("exporting individual objects")
             individual_export_list = []
             for i in export_list:
-                print("export list ", i)
-                for ii in i[1]: # i[1] is a list of objects 
+                for ii in i[1]:  # i[1] is a list of objects
                     fullpath = utils.find_parent_path_recursive(self, bpy.data.objects[ii].users_collection[-1], "")
                     if "__MERGED_" in fullpath:
                         fullpath = fullpath.split("__MERGED_")[1]
-                    print(fullpath, " ", ii )
                     if self.selected:
-                        print(f"is {bpy.data.objects[ii]} in {selected_objects}")
                         if bpy.data.objects[ii] in selected_objects:
                             individual_export_list.append([fullpath, [ii]])
                     else:
