@@ -15,7 +15,7 @@ class MergeCollection(bpy.types.Operator):
     def merge_active(self):
         # called by this class and can be run alone
         col = bpy.context.view_layer.active_layer_collection.collection
-        name = MergeCollection.rename_merge_collection(self, col.name)
+        name = MergeCollection.rename_merge_collection(self, col.name, col)
         col_copy = utils.Utils.duplicate_collection(self, col)
         col_copy.name = name
         vlc = bpy.context.view_layer.layer_collection
@@ -27,7 +27,7 @@ class MergeCollection(bpy.types.Operator):
         # called by game export script
         # duplicate collection and rename
         col_copy = utils.Utils.duplicate_collection(self, col)
-        col_copy.name = MergeCollection.rename_merge_collection(self, col.name)
+        col_copy.name = MergeCollection.rename_merge_collection(self, col.name, col)
         bpy.context.view_layer.layer_collection.collection.children.link(col_copy)
         # merge all objects into one
         MergeCollection.merge(self, col_copy, utils.Utils.find_origin(self, col))
@@ -88,11 +88,13 @@ class MergeCollection(bpy.types.Operator):
                 o.select_set(True)
             bpy.context.view_layer.objects.active = obj_list[0]
             MergeCollection.apply_modifiers(self, col)
+            MergeCollection.convert_uv(self, col)
             utils.Utils.addCustomNormalsToSelected(self)
             bpy.ops.object.join()
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             # fix to stop conflicts with new merged objects against old objects
-            new_name = col.name.replace("__MERGED_", "")
+            # new_name = col.name.replace("__MERGED_", "")
+            new_name = col.name.split("__MERGED_")[0]
             for o in bpy.data.objects:
                 if o.name == new_name:
                     o.name += "_CONFLICT__"
@@ -118,9 +120,26 @@ class MergeCollection(bpy.types.Operator):
             ob.select_set(False)
         for obj in sel_obj_cache:
             obj.select_set(True)
+    
+    def convert_uv(self, col):
+        active_obj_cache = bpy.context.active_object
+        # convert attributes to uvs for geometry nodes
+        for o in col.objects:
+            try:                
+                o.data.attributes.active = o.data.attributes["UVMap"]
+                bpy.context.view_layer.objects.active = o
+                bpy.ops.geometry.attribute_convert(mode="UV_MAP")
+                print(o.name + " has attributes UVMap ")
+            except:
+                print(o.name + " has NO attributes UVMap ")
+                pass
+        bpy.context.view_layer.objects.active = active_obj_cache
 
-    def rename_merge_collection(self, name):
+    def rename_merge_collection(self, name, old_col):
         if "&" in name:
+            col_path = utils.Utils.find_parent_path_recursive(self, old_col, "")
+            col_path = col_path.replace(name+"\\", "")
             name = name.replace("&", "")  # TODO replace with global
-            name += "__MERGED_"
+            name += "__MERGED_" + col_path
+            
         return name

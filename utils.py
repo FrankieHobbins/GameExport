@@ -39,6 +39,17 @@ class Utils(bpy.types.Operator):
             if col.name in c.children:
                 return(Utils.find_parent_recursive(self, c))
 
+    def find_parent_path_recursive(self, col, path_str):
+        if col is None:
+            return path_str
+        path_str = col.name + "\\" + path_str
+        parent_col = None
+        for c in bpy.data.collections:
+            if col.name in c.children:
+                parent_col = c
+                break
+        return Utils.find_parent_path_recursive(self, parent_col, path_str)
+
     def find_view_layer_collection(self, col, col_layer, col_list):
         if col_layer.collection == col:
             col_list.append(col_layer)
@@ -92,7 +103,6 @@ class Utils(bpy.types.Operator):
         if bake == "":
             if "^" in col.name:
                 return False
-        
         exclusion_list = ["*", "cutter"]  # TODO place in user prefs
         if bpy.context.scene.FBXExportHigh == False:
 
@@ -147,7 +157,6 @@ class Utils(bpy.types.Operator):
     def duplicate_objects(self, old_col, new_col):
         merge_prefix = "_M_"  # TODO make global
         child_parent_list = []
-        
         for obj in old_col.objects:
             if obj.parent and obj.parent.name in old_col.objects:
                 obj_name = obj.name
@@ -194,13 +203,11 @@ class Utils(bpy.types.Operator):
             for prop in properties:
                 setattr(m_dst, prop, getattr(m_src, prop))
 
-    def setpath(self, col_name):
+    def setpath(self, col_name, obj_name):
         path = bpy.context.scene.FbxExportPath
-        print("path is: ",path)
+        print("path is: ", path)
         if bpy.context.preferences.addons['GameExport'].preferences.user_path != "":
-            print("path is not blank")
             path = path.replace("$path$", bpy.context.preferences.addons['GameExport'].preferences.user_path)
-
         prefix = bpy.context.scene.FbxExportPrefix
         if path == "":
             path = os.path.dirname(bpy.data.filepath) + "\\"
@@ -208,8 +215,12 @@ class Utils(bpy.types.Operator):
             path = os.path.dirname(bpy.data.filepath) + "\\" + path
         col_name = col_name.replace("&", "")  # TODO replace with global
         if bpy.context.scene.FBXExportColletionIsFolder:
-            col_name = col_name + "\\" + col_name
-        path += prefix + col_name + ".fbx"
+            print(col_name, obj_name[0])
+            path += col_name + "\\" + prefix + obj_name[0] + ".fbx"
+        elif bpy.context.scene.FBXExportSM:
+            path += prefix + col_name + obj_name[0] + ".fbx"
+        else:
+            path += prefix + col_name + ".fbx"
         try:
             dir_name = os.path.dirname(path)
             os.makedirs(dir_name)

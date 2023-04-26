@@ -61,7 +61,8 @@ class MakeList(bpy.types.Operator):
             new_list_4 = {i for i in new_list_3 if i != None}
             MakeList.list_of_collections_to_export = new_list_4
 
-    def make_export_list(self, vlc, bake):
+    def make_export_list(self, sel_objects, bake):
+        selected_objects = [i for i in sel_objects]
         export_list = []  # collection name and objects inside it
         objects_to_delete = []
         objects_to_not_delete = []
@@ -71,7 +72,7 @@ class MakeList(bpy.types.Operator):
                 continue
             # definitions
             children_collections = []
-            export_objects = []            
+            export_objects = []
             # populate export collection with objects
             utils.get_all_children_collections(self, col, children_collections)
             children_collections.append(col)
@@ -88,6 +89,7 @@ class MakeList(bpy.types.Operator):
                         for o in merged_objects:
                             objects_to_delete.append(o.name)
                             export_objects.append(o.name)
+                            selected_objects.append(o)
                             o.select_set(True)
                     # else put all objects into export list
                     else:
@@ -98,10 +100,18 @@ class MakeList(bpy.types.Operator):
             export_list.append([col.name, export_objects])
         # if export as individuals is set, want to break the list up so we dont use collections and each individual object has its own list entry
         if bpy.context.scene.FBXExportSM:
+            print("exporting individual objects")
             individual_export_list = []
             for i in export_list:
-                for ii in i[1]:
-                    individual_export_list.append([ii, [ii]])
+                for ii in i[1]:  # i[1] is a list of objects
+                    fullpath = utils.find_parent_path_recursive(self, bpy.data.objects[ii].users_collection[-1], "")
+                    if "__MERGED_" in fullpath:
+                        fullpath = fullpath.split("__MERGED_")[1]
+                    if self.selected:
+                        if bpy.data.objects[ii] in selected_objects:
+                            individual_export_list.append([fullpath, [ii]])
+                    else:
+                        individual_export_list.append([fullpath, [ii]])
             export_list = individual_export_list
         # dont delete empties that already existed
         for i in objects_to_not_delete:
