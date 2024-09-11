@@ -1,21 +1,3 @@
-# BEGIN GPL LICENSE BLOCK #####
-#
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
-#  of the License, or (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software Foundation,
-#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-#
-# END GPL LICENSE BLOCK #####
-
 import importlib
 import bpy
 bl_info = {
@@ -97,6 +79,7 @@ bpy.types.Scene.FBXFlipUVIndex = bpy.props.BoolProperty(name="FBXFlipUVIndex", d
 bpy.types.Scene.FBXExportHigh = bpy.props.BoolProperty(name="FBXExportHigh", default=True, description="Disable Exporting of Highpoly Collections")
 bpy.types.Scene.FBXExportLow = bpy.props.BoolProperty(name="FBXExportLow", default=True, description="Disable Exporting of Lowpoly Collections")
 bpy.types.Scene.FBXKeepEmpties = bpy.props.BoolProperty(name="FBXKeepEmpties", default=False, description="Keep empties, apart from origins")
+bpy.types.Scene.FBXKeepLightsAndCameras = bpy.props.BoolProperty(name="FBXKeepLightsAndCameras", default=False, description="Keep lights and cameras")
 bpy.types.Scene.FBXFreezeInstances = bpy.props.BoolProperty(name="FBXFreezeInstances", default=False, description="Turn instance geo into real geo")
 bpy.types.Scene.FBXCullInstanceCollections = bpy.props.BoolProperty(name="FBXCullInstanceCollections", default=False, description="Set empty collections to none before exporting")
 bpy.types.Object.action_list_index = bpy.props.IntProperty()
