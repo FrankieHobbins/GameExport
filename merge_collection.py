@@ -123,16 +123,23 @@ class MergeCollection(bpy.types.Operator):
     
     def convert_uv(self, col):
         active_obj_cache = bpy.context.active_object
-        # convert attributes to uvs for geometry nodes
-        for o in col.objects:
-            try:                
-                o.data.attributes.active = o.data.attributes["UVMap"]
-                bpy.context.view_layer.objects.active = o
-                bpy.ops.geometry.attribute_convert(mode="UV_MAP")
-                print(o.name + " has attributes UVMap ")
-            except:
-                print(o.name + " has NO attributes UVMap ")
-                pass
+        for obj in col.objects:
+            if obj.type == 'MESH':
+                for attr in obj.data.attributes:
+                    if "UV" in attr.name:
+                        try:
+                            obj.data.attributes.active = attr
+                            bpy.context.view_layer.objects.active = obj
+                            bpy.ops.geometry.attribute_convert(
+                                mode='GENERIC',  # Use the generic mode for flexibility
+                                domain='CORNER',  # Convert in the POINT domain
+                                data_type='FLOAT2'  # Use FLOAT2 data type for UV maps
+                            )
+                            print(f"Converted '{attr.name}' to UV for {obj.name}")
+
+                        except Exception as e:
+                            print(f"Error converting '{attr.name}' for {obj.name}: {e}")
+
         bpy.context.view_layer.objects.active = active_obj_cache
 
     def rename_merge_collection(self, name, old_col):
