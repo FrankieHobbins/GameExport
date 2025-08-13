@@ -1,21 +1,3 @@
-# BEGIN GPL LICENSE BLOCK #####
-#
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
-#  of the License, or (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software Foundation,
-#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-#
-# END GPL LICENSE BLOCK #####
-
 import importlib
 import bpy
 bl_info = {
@@ -68,9 +50,18 @@ classes = (
 
 
 def update_path(self, context):
-    if bpy.context.preferences.addons[__package__].preferences.user_path != "":
-        self.FbxExportPath = self.FbxExportPath.replace(bpy.context.preferences.addons[__package__].preferences.user_path, "$path$")
-    
+    print("checking to see if path " + self.FbxExportPath + " needs to be updated with $path$ from user prefs.")
+    if "$path$" in self.FbxExportPath and bpy.context.preferences.addons[__package__].preferences.user_path == "":
+        print("to use the $path$ function of game exporter to export assign a path in the game export plugin settings")
+        return
+
+    if "$path$" not in self.FbxExportPath:
+        print("it doesnt")
+        return
+
+    print("it does")
+    new_path = self.FbxExportPath.replace("$path$", bpy.context.preferences.addons[__package__].preferences.user_path)
+    self.FbxExportPath = new_path
 
 
 bpy.types.Scene.FbxExportPath = bpy.props.StringProperty(name="Path", default="", subtype="DIR_PATH", description="Path to export to", update=update_path)
@@ -97,6 +88,7 @@ bpy.types.Scene.FBXFlipUVIndex = bpy.props.BoolProperty(name="FBXFlipUVIndex", d
 bpy.types.Scene.FBXExportHigh = bpy.props.BoolProperty(name="FBXExportHigh", default=True, description="Disable Exporting of Highpoly Collections")
 bpy.types.Scene.FBXExportLow = bpy.props.BoolProperty(name="FBXExportLow", default=True, description="Disable Exporting of Lowpoly Collections")
 bpy.types.Scene.FBXKeepEmpties = bpy.props.BoolProperty(name="FBXKeepEmpties", default=False, description="Keep empties, apart from origins")
+bpy.types.Scene.FBXKeepLightsAndCameras = bpy.props.BoolProperty(name="FBXKeepLightsAndCameras", default=False, description="Keep lights and cameras")
 bpy.types.Scene.FBXFreezeInstances = bpy.props.BoolProperty(name="FBXFreezeInstances", default=False, description="Turn instance geo into real geo")
 bpy.types.Scene.FBXCullInstanceCollections = bpy.props.BoolProperty(name="FBXCullInstanceCollections", default=False, description="Set empty collections to none before exporting")
 bpy.types.Object.action_list_index = bpy.props.IntProperty()
