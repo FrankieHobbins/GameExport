@@ -167,6 +167,8 @@ class PANEL_PT_gameexportsettings(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FBXKeepEmpties", text="Keep Empties")
         row = layout.row()
+        row.prop(context.scene, "FBXKeepLightsAndCameras", text="Keep Lights And Cameras")
+        row = layout.row()
         row.prop(context.scene, "FBXFreezeInstances", text="Freeze Instances")
         row = layout.row()
         row.prop(context.scene, "FBXCullInstanceCollections", text="Dont Export Instances On Empty Objects")

@@ -50,7 +50,9 @@ class FBXExport(bpy.types.Operator):
     def export_fbx_settings_unity(self):
         object_types = {'OTHER', 'MESH', 'ARMATURE'}
         if bpy.context.scene.FBXKeepEmpties:
-            object_types = {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'}
+            object_types.add('EMPTY')
+        if bpy.context.scene.FBXKeepLightsAndCameras:
+            object_types.update({'LIGHT', 'CAMERA'})
         if self.bake:
             object_types = {'OTHER', 'MESH', 'ARMATURE', 'EMPTY'}
         return {
