@@ -159,6 +159,8 @@ class PANEL_PT_gameexportsettings(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, "FbxExportEngine", text="engine")
         row = layout.row()
+        row.prop(context.scene, "ExportFormat", text="Format")
+        row = layout.row()
         row.prop(context.scene, "FBXFixUnityRotation", text="Fix Unity Rotation")
         row = layout.row()
         row.prop(context.scene, "FBXExportSM", text="Individual Objects")

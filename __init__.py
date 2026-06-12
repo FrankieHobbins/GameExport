@@ -42,6 +42,7 @@ classes = (
     ui.OpenFolder,
     ui.PANEL_PT_gameexport_addon_prefs,
     export.FBXExport,
+    export.GLBExport,
     tools.Tools,
     tools.VetexGroupAssign,
     tools.VetexGroupRemove,
@@ -74,6 +75,15 @@ bpy.types.Scene.FbxExportEngine = bpy.props.EnumProperty(
         ('unreal', 'Unreal', '', '', 2)
     ],
     default='unity'
+)
+bpy.types.Scene.ExportFormat = bpy.props.EnumProperty(
+    name="Export Format",
+    description="Choose export format: FBX or GLB",
+    items=[
+        ('fbx', 'FBX', 'Export as FBX format', '', 0),
+        ('glb', 'GLB', 'Export as GLB (glTF Binary) format', '', 1)
+    ],
+    default='fbx'
 )
 bpy.types.Scene.FBXExportSelected = bpy.props.BoolProperty(name="FBXExportSelected", default=False, description="Only export collection of currently selected object")
 bpy.types.Scene.FBXExportSM = bpy.props.BoolProperty(name="FBXExportSM", default=False, description="Each object gets a unique FBX")

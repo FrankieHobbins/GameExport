@@ -214,13 +214,15 @@ class Utils(bpy.types.Operator):
         elif path[1] != ":":
             path = os.path.dirname(bpy.data.filepath) + "\\" + path
         col_name = col_name.replace("&", "")  # TODO replace with global
+        # Use correct file extension based on selected export format
+        ext = ".glb" if bpy.context.scene.ExportFormat == 'glb' else ".fbx"
         if bpy.context.scene.FBXExportColletionIsFolder:
             print(col_name, obj_name[0])
-            path += col_name + "\\" + prefix + obj_name[0] + ".fbx"
+            path += col_name + "\\" + prefix + obj_name[0] + ext
         elif bpy.context.scene.FBXExportSM:
-            path += prefix + col_name + obj_name[0] + ".fbx"
+            path += prefix + col_name + obj_name[0] + ext
         else:
-            path += prefix + col_name + ".fbx"
+            path += prefix + col_name + ext
         try:
             dir_name = os.path.dirname(path)
             os.makedirs(dir_name)

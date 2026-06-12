@@ -82,7 +82,11 @@ class Main(bpy.types.Operator):
             print(i[0], i[1])
             path = ut.setpath(self, i[0], i[1])
             self.prepare_objects_for_export(i[0], i[1], export_col, obj_and_pos_list, obj_and_instance_type)
-            export.FBXExport.export(self, path, export_col)
+            # Route to correct exporter based on format selection
+            if bpy.context.scene.ExportFormat == 'glb':
+                export.GLBExport.export(self, path, export_col)
+            else:
+                export.FBXExport.export(self, path, export_col)
             self.cleanup(i[1], export_col, obj_and_pos_list, obj_and_instance_type)
         # restore cached data
         self.cleanup_merged(objects_to_delete)
