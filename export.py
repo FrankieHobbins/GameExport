@@ -11,9 +11,18 @@ class GLBExport(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def export(self, path, export_col):
-            if self.process_without_export:
-                return
-            bpy.ops.export_scene.gltf(filepath=path, **GLBExport.export_glb_settings_godot(self))
+        if self.process_without_export:
+            return
+        # Select all objects in the export collection before exporting
+        # This is needed because glTF exporter's use_visible filter can exclude objects
+        # from temporary collections that aren't properly visible in the view layer
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in export_col.objects:
+            obj.select_set(True)
+        # Set the active object to ensure proper export context
+        if export_col.objects:
+            bpy.context.view_layer.objects.active = export_col.objects[0]
+        bpy.ops.export_scene.gltf(filepath=path, **GLBExport.export_glb_settings_godot(self))
 
     def export_glb_settings_godot(self):
         return {
@@ -65,7 +74,7 @@ class GLBExport(bpy.types.Operator):
             "use_mesh_vertices": False,
             "export_cameras": False,
             "use_selection": True,
-            "use_visible": True,
+            "use_visible": False,
             "use_renderable": False,
             "use_active_collection_with_nested": True,
             "use_active_collection": True,
